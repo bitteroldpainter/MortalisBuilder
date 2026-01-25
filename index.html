@@ -1,0 +1,2572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+ <title>Mortalis Fighter Builder</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    }
+    body {
+      margin: 0;
+      background: #0f1113;
+      color: #e4e7eb;
+    }
+    .app {
+      max-width: 960px;
+      margin: 0 auto;
+      min-height: 100vh;
+      padding: 1.5rem 1rem 2rem;
+    }
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .top-title {
+      font-size: 1.4rem;
+      font-weight: 600;
+    }
+    .points-box-inline {
+      padding: 0.4rem 0.7rem;
+      border-radius: 0.5rem;
+      background: #2b1400;
+      border: 1px solid #ff8c00;
+      font-weight: 600;
+    }
+    .card {
+      background: #1E2024;  
+      border-radius: 0.75rem;
+      border: 1px solid #2a2d31;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.75rem;
+        position: relative;
+    }
+    .card h2 {
+      margin: 0 0 0.75rem;
+      font-size: 1.2rem;
+    }
+
+    /* Stats row + pills */
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .stat-pill {
+      background: #141619;
+      border: 1px solid #ff9f1c;
+      border-radius: 12px;
+      padding: 0.45rem 0.7rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 80px;
+    }
+    .stat-pill-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #9aa1a8;
+      margin-bottom: 0.15rem;
+    }
+    .stat-pill-controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.2rem;
+    }
+    .stat-pill-value {
+      font-weight: 600;
+      font-size: 1.2rem;
+    }
+    .stat-btn-vert {
+      width: 26px;
+      height: 20px;
+      border-radius: 999px;
+      border: 1px solid #4b5563;
+      background: #1f2937;
+      color: #e5e7eb;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .stat-btn-vert:hover {
+      background: #374151;
+    }
+
+    /* Psyker block */
+    .warlock-box {
+      margin-top: 0.75rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid #1f2937;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1.5rem;
+      align-items: center;
+    }
+    .warlock-option {
+      font-size: 0.85rem;
+    }
+    .warlock-option input {
+      margin-right: 0.3rem;
+    }
+    .warlock-note {
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+
+    .summary-highlight {
+      margin-top: 0.75rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    /* Tabs under stats */
+    .tabs-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 0.5rem 0 0.75rem;
+    }
+    .tab-pill {
+      padding: 0.3rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid #374151;
+      background: #141619;
+      color: #e5e7eb;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .tab-pill-colour {
+      padding: 0.3rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid #374151;
+      background: #f08102;
+      color: #e5e7eb;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .tab-pill:hover {
+      background: #030712;
+    }
+    .tab-pill.active {
+      background: #ff8c00;
+      color: #ffffff;
+      border-color: #101213;
+    }
+
+    /* Sub-tabs (used inside Ranged Weapons) */
+    .subtabs-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:0.4rem;
+      margin:0.25rem 0 0.75rem;
+    }
+    .subtab-pill{
+      padding:0.2rem 0.6rem;
+      border-radius:999px;
+      border:1px solid #374151;
+      background:#101216;
+      color:#e5e7eb;
+      cursor:pointer;
+      font-size:0.85rem;
+      line-height:1.2;
+    }
+    .subtab-pill:hover{ border-color:#6b7280; }
+    .subtab-pill.active{
+      background:#1f2937;
+      border-color:#9ca3af;
+    }
+
+    /* Generic lists (weapons, abilities, etc.) */
+    .flex-columns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .column {
+      flex: 1 1 0;
+      min-width: 220px;
+    }
+    .item-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      font-size: 0.9rem;
+    }
+    .item-row {
+      padding: 0.35rem 0.5rem;
+      border-radius: 0.5rem;
+      background: #101216;
+      border: 1px solid #ff9f1c;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+    .item-row-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .item-main {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+    .item-name {
+      font-weight: 600;
+    }
+    .item-detail {
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+    .item-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.15rem;
+    }
+    .item-points {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .item-actions button {
+      border: none;
+      background: #ff8c00;
+      color: #111827;
+      padding: 0.25rem 0.55rem;
+      border-radius: 0.375rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .item-actions button:hover {
+      background: #ffffff;
+    }
+    .item-actions .remove-btn {
+      background: #7f1d1d;
+      color: #fecaca;
+    }
+    .item-actions .remove-btn:hover {
+      background: #b91c1c;
+    }
+
+    /* Weapon upgrades in selected weapon rows */
+    .weapon-upgrades {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-top: 0.15rem;
+    }
+    .weapon-upgrades label {
+      display: flex;
+      align-items: center;
+      gap: 0.15rem;
+    }
+    .weapon-upgrades input {
+      width: 12px;
+      height: 12px;
+    }
+/* Summary category pill */
+.summary-pill {
+  background: #141619;
+  border: 1px solid #2a2d31;
+  border-radius: 12px;
+  padding: 0.7rem 1rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Underlined category titles */
+.summary-category-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.35rem;
+  padding-bottom: 0rem;
+  border-bottom: 1px solid #ff8c00;
+  display: inline-block;
+}
+      /* Total Points inside Stats box */
+.stats-total-container {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;   /* ← centers vertically */
+  margin-top: 0.3rem;
+}
+/* Row for the Total Points pill inside the stats card */
+.stats-total-row {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+      /* Total Points pill inside stats card, floating top-right */
+.stats-total-floating {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 10px;
+  background: #2b1400;
+  border: 1px solid #ff8c00;
+  font-weight: 600;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+
+    /* Options as exactly 2 columns */
+    .weapons-options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.4rem;
+    }
+
+    /* 3-column layout: 2/3 options (2 cards), 1/3 selected */
+    .weapons-layout .options-column {
+      flex: 2 1 0;
+    }
+    .weapons-layout .selected-column {
+      flex: 1 1 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="top-bar">
+     <div class="top-title">Mortalis Fighter Builder</div>
+    </header>
+
+    <main>
+      <!-- Stats always visible -->
+      <section id="section-stats"></section>
+
+      <!-- Tabs for the rest -->
+      <div id="section-tabs" class="tabs-row">
+        <button class="tab-pill active" data-target="section-weapons-cc">Close Combat Weapons</button>
+        <button class="tab-pill" data-target="section-weapons-ranged">Ranged Weapons</button>
+        <button class="tab-pill" data-target="section-abilities">Fighter Abilities</button>
+        <button class="tab-pill" data-target="section-leader">Leader Abilities</button>
+        <button class="tab-pill" data-target="section-spells">Psychic Powers</button>
+        <button class="tab-pill" data-target="section-equipment">Equipment</button>
+        <button class="tab-pill" data-target="section-summary">Summary</button>
+      </div>
+
+      <!-- Tabbed sections -->
+      <section id="section-weapons-cc"></section>
+      <section id="section-weapons-ranged"></section>
+      <section id="section-abilities"></section>
+      <section id="section-leader"></section>
+      <section id="section-spells"></section>
+      <section id="section-equipment"></section>
+      <section id="section-summary"></section>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      // STAT + COST CONFIG
+      var STAT_CONFIG = [
+        { key: "move",  label: "Move",  unit: '"', base: 6, min: 5, max: 8,  upCost: 4, downCost: 4, lowerIsBetter: false },
+        { key: "def",   label: "DEF",   unit: "+", base: 9, min: 5, max: 11, upCost: 1, downCost: 1, lowerIsBetter: true  },
+        { key: "ap",    label: "AP",    unit: "",  base: 2, min: 2, max: 4,  upCost: 4, downCost: 4, lowerIsBetter: false },
+        { key: "hp",    label: "HP",    unit: "",  base: 7, min: 3, max: 99, upCost: 1, downCost: 1, lowerIsBetter: false },
+        { key: "atk",   label: "ATK",   unit: "",  base: 3, min: 3, max: 5,  upCost: 2, downCost: 0, lowerIsBetter: false },
+        { key: "fight", label: "Fight", unit: "+", base: 7, min: 5, max: 11, upCost: 2, downCost: 1, lowerIsBetter: true  },
+        { key: "shoot", label: "Shoot", unit: "+", base: 7, min: 5, max: 11, upCost: 2, downCost: 1, lowerIsBetter: true  }
+      ];
+
+      // CLOSE COMBAT WEAPONS (example)
+     var CC_WEAPONS = [
+  { id: "fistsClaws", name: "Fists/Claws", profile: "ATK User, Hit User, DMG 2/3", points: 0 },
+  { id: "beastClawsBite", name: "Beast Claws/Bite", profile: "ATK User, Hit User, DMG 3/4", points: 2 },
+  { id: "bigBladeAxe", name: "Big Blade/Axe", profile: "ATK User, Hit User, DMG 3/5", points: 3 },
+  { id: "bigChainblade", name: "Big Chainblade", profile: "ATK User, Hit User, DMG 5/6", points: 5 },
+  { id: "bladeAxe", name: "Blade/Axe", profile: "ATK User, Hit User, DMG 3/4", points: 2 },
+  { id: "chainsword", name: "Chainsword", profile: "ATK User, Hit User, DMG 4/5", points: 4 },
+  { id: "hugeHammerAxeBlade", name: "Huge Hammer/Axe/Blade", profile: "ATK User, Hit User, DMG 5/6, Reroll (1)", points: 6 },
+  { id: "monstrousClaws", name: "Monstrous Claws", profile: "ATK User, Hit User, DMG 5/6, MW (1)", points: 6 },
+  { id: "poisonedKnife", name: "Poisoned Knife", profile: "ATK User, Hit User, DMG 3/4, Poison", points: 3 },
+  { id: "poisonedWeapon", name: "Poisoned Weapon", profile: "ATK User, Hit User, DMG 4/5, Poison, Reroll (SR)", points: 6 },
+  { id: "powerFist", name: "Power Fist", profile: "ATK User, Hit User-2, DMG 5/7, Crits on 9+, MW (1)", points: 7 },
+  { id: "powerKnife", name: "Power Knife", profile: "ATK User, Hit User, DMG 3/5, Crits on 9+", points: 4 },
+  { id: "powerRapier", name: "Power Rapier", profile: "ATK User, Hit User, DMG 4/5, Crits on 9+", points: 6 },
+  { id: "powerWeapon", name: "Power Weapon", profile: "ATK User, Hit User, DMG 4/6, Crits on 9+", points: 7 },
+  { id: "psychicStaff", name: "Psychic Staff", profile: "ATK User, Hit User, DMG 4/6, Crits on 9+, Fire", points: 8 },
+  { id: "thunderHammer", name: "Thunder Hammer", profile: "ATK User, Hit User-2, DMG 5/7, Crits on 9+, MW (2)", points: 8 }
+];
+
+
+      // RANGED WEAPONS (example)
+      var RANGED_WEAPONS = [
+  // --- Pistols / Grenades ---
+  { id: "arcPistol", name: "Arc Pistol", profile: 'ATK 4, Hit User, DMG 4/5, Rng 8", Piercing (-3)', points: 4 },
+  { id: "autoLaspistol", name: "Auto/Laspistol", profile: 'ATK 4, Hit User, DMG 2/3, Rng 8"', points: 2 },
+  { id: "boltPistol", name: "Bolt Pistol", profile: 'ATK 4, Hit User, DMG 3/4, Rng 8", Piercing Crits (-2)', points: 3 },
+  { id: "handFlamer", name: "Hand Flamer", profile: 'ATK 4, Hit User+2, DMG 3/4, Rng 6", Ignores Cover, Torrent (1"), Fire', points: 5 },
+  { id: "meltaPistol", name: "Melta Pistol", profile: 'ATK 4, Hit User, DMG 6/3, Rng 3", Piercing (-5), MW (4)', points: 7 },
+  { id: "phosphorBlastPistol", name: "Phosphor Blast Pistol", profile: 'ATK 4, Hit User, DMG 3/4, Rng 8", Blast (1")', points: 4 },
+  { id: "plasmaPistol", name: "Plasma Pistol", profile: 'ATK 4, Hit User, DMG (Std) 5/6, Rng 8", Piercing (-3), Crits on 9+; Alt (Supercharged): ATK 4, Hit User, DMG 6/6, Rng 8", Piercing (-4), Crits on 9+, Risky', points: 7 },
+  { id: "rokkitPistol", name: "Rokkit Pistol", profile: 'ATK 6, Hit User, DMG 4/5, Rng 8", Blast (1")', points: 7 },
+  { id: "slugga", name: "Slugga", profile: 'ATK 6, Hit User, DMG 1/2, Rng 8"', points: 2 },
+  { id: "warpflamePistol", name: "Warpflame Pistol", profile: 'ATK 4, Hit User+2, DMG 3/4, Rng 6", Ignores Cover, Piercing (-2), Torrent (1"), Fire', points: 6 },
+  { id: "fragGrenade", name: "Frag Grenade", profile: 'ATK 4, Hit User-2, DMG 2/4, Rng 6", Blast (2"), Ignores Cover, One Use Only', points: 2 },
+  { id: "krakGrenade", name: "Krak Grenade", profile: 'ATK 4, Hit User-2, DMG 4/5, Rng 6", Piercing (-2), Ignores Cover, One Use Only', points: 2 },
+  { id: "meltaBomb", name: "Melta Bomb", profile: 'ATK 4, Hit User-2, DMG 5/6, Rng 6", Blast (2"), Piercing (-2), Ignores Cover, One Use Only, 2 AP action', points: 4 },
+
+  // --- Light / Medium Ranged ---
+  { id: "autoLasgun", name: "Auto/Lasgun", profile: "ATK 4, Hit User, DMG 2/3", points: 3 },
+  { id: "boltGun", name: "Bolt Gun", profile: "ATK 4, Hit User, DMG 3/4, Piercing Crits (-2)", points: 4 },
+  { id: "gaussBlaster", name: "Gauss Blaster", profile: "ATK 4, Hit User, DMG 4/5, Piercing (-2)", points: 5 },
+  { id: "hvyShotgun", name: "Hvy. Shotgun", profile: 'ATK 4, Hit User+2, DMG 4/4, Rng 6"', points: 4 },
+  { id: "infernoBoltGun", name: "Inferno Bolt Gun", profile: "ATK 4, Hit User, DMG 3/4, Piercing (-2)", points: 5 },
+  { id: "ionRifle", name: "Ion Rifle", profile: "ATK 4, Hit User, DMG 4/5, Piercing Crits (-2)", points: 5 },
+  { id: "neutronBlaster", name: "Neutron Blaster", profile: "ATK 4, Hit User, DMG 3/3, MW (2)", points: 6 },
+  { id: "pulseCarbine", name: "Pulse Carbine", profile: "ATK 4, Hit User, DMG 4/5, Reroll (1)", points: 5 },
+  { id: "shotgun", name: "Shotgun", profile: 'ATK 4, Hit User+2, DMG 3/3, Rng 6"', points: 3 },
+  { id: "shurikenRifle", name: "Shuriken Rifle", profile: "ATK 4, Hit User, DMG 3/4, Piercing (-2)", points: 5 },
+  { id: "teslaCarbine", name: "Tesla Carbine", profile: 'ATK 5, Hit User, DMG 3/3, Deals MW (2) to Fighters within 2" of target', points: 6 },
+
+  // --- Special ---
+  { id: "flamer", name: "Flamer", profile: 'ATK 4, Hit User+2, DMG 4/4, Rng 10", Ignores Cover, Torrent (2"), Fire', points: 10 },
+  { id: "grenadeLauncher", name: "Grenade Launcher", profile: 'ATK 4, Hit User, DMG (Frag) 2/4, Blast (2"); Alt (Krak): ATK 4, Hit User, DMG 4/5, Piercing (-2)', points: 10 },
+  { id: "meltaGun", name: "Melta Gun", profile: 'ATK 4, Hit User, DMG 6/3, Rng 6", Piercing (-5), MW (4)', points: 10 },
+  { id: "neutronRailRifle", name: "Neutron Rail Rifle", profile: "ATK 4, Hit User, DMG 4/4, MW (2)", points: 7 },
+  { id: "plasmaGun", name: "Plasma Gun", profile: 'ATK 4, Hit User, DMG (Std) 5/6, Piercing (-3), Crits on 9+; Alt (Supercharged): ATK 4, Hit User, DMG 6/6, Piercing (-4), Crits on 9+, Risky', points: 10 },
+  { id: "scopedBigShoota", name: "Scoped Big Shoota", profile: 'ATK 5, Hit User+1, DMG 3/3, MW (2), Heavy (Dash)', points: 10 },
+  { id: "shredder", name: "Shredder", profile: "ATK 4, Hit User, DMG 4/5, Piercing (-3)", points: 9 },
+  { id: "sniperRifle", name: "Sniper Rifle", profile: 'ATK 4, Hit User+1, DMG 3/3, Piercing (-2), Ignores Cover, MW (3)', points: 12 },
+  { id: "synapticDisintegrator", name: "Synaptic Disintegrator", profile: 'ATK 4, Hit User+1, DMG 4/3, Piercing (-2), Ignores Cover, MW (2)', points: 14 },
+  { id: "warpflamer", name: "Warpflamer", profile: 'ATK 4, Hit User+2, DMG 4/4, Rng 8", Ignores Cover, Torrent (2"), Piercing (-2), Fire', points: 7 },
+
+  // --- Heavy ---
+  { id: "eavyRokkitLauncha", name: "‘Eavy Rokkit Launcha", profile: 'ATK 6, Hit User+2, DMG 4/5, Blast (1"), Heavy (Dash)', points: 13 },
+  { id: "bigShoota", name: "Big Shoota", profile: "ATK 6, Hit User, DMG 3/4", points: 7 },
+  { id: "chaincannon", name: "Chaincannon", profile: 'ATK 6, Hit User, DMG 4/4, Reroll (1), Heavy (Dash)', points: 10 },
+  { id: "fragCannon", name: "Frag Cannon", profile: 'Mode (Shell): ATK 4, Hit User, DMG 5/7, Piercing (-3); Alt (Shrapnel): ATK 5, Hit User, DMG 4/5, Blast (2")', points: 10 },
+  { id: "heavyBolter", name: "Heavy Bolter", profile: 'ATK 5, Hit User, DMG 5/6, Reroll (1), Heavy (Dash)', points: 10 },
+  { id: "heavyStubber", name: "Heavy Stubber", profile: 'ATK 5, Hit User, DMG 4/5, Heavy (Dash)', points: 6 },
+  { id: "lascannon", name: "Lascannon", profile: 'ATK 4, Hit User, DMG 6/7, Piercing (-2), MW (2), Heavy (Dash)', points: 10 },
+  { id: "missileLauncher", name: "Missile Launcher", profile: 'Mode (Krak): ATK 4, Hit User, DMG 6/7, Piercing (-4), Heavy (Dash); Alt (Frag): ATK 4, Hit User, DMG 3/5, Blast (2"), Piercing Crits (-2), Heavy (Dash)', points: 10 },
+  { id: "multiMelta", name: "Multi Melta", profile: 'ATK 4, Hit User, DMG 6/3, MW (4), Heavy (Dash), Piercing (-5)', points: 13 },
+  { id: "plasmaCannon", name: "Plasma Cannon", profile: 'Mode (Std): ATK 4, Hit User, DMG 5/6, Blast (2"), Piercing (-3), Heavy (Dash); Alt (Supercharged): ATK 4, Hit User, DMG 6/6, Blast (2"), Piercing (-3), Heavy (Dash), Risky', points: 12 },
+  { id: "rokkitLauncha", name: "Rokkit Launcha", profile: 'ATK 6, Hit User, DMG 4/5, Blast (1")', points: 9 },
+  { id: "shurikenCannon", name: "Shuriken Cannon", profile: "ATK 5, Hit User, DMG 4/5", points: 7 },
+  { id: "soulreaperCannon", name: "Soulreaper Cannon", profile: "ATK 6, Hit User, DMG 4/5, Piercing Crits (-2)", points: 12 },
+  { id: "wraithCannon", name: "Wraith Cannon", profile: 'ATK 4, Hit User, DMG 6/3, MW (3), Heavy (Dash), Piercing (-4), Crits on 9+', points: 13 }
+];
+
+      // --- Ranged weapon sub-categories ---
+      // Used to filter the RANGED_WEAPONS list into sub-tabs (selection/points logic is unchanged).
+      var RANGED_CATEGORIES = [
+        { key: "pistols", label: "Pistols/Grenades", ids: [
+          "arcPistol",
+          "autoLaspistol",
+          "boltPistol",
+          "handFlamer",
+          "meltaPistol",
+          "phosphorBlastPistol",
+          "plasmaPistol",
+          "rokkitPistol",
+          "slugga",
+          "warpflamePistol",
+          "fragGrenade",
+          "krakGrenade",
+          "meltaBomb"
+        ]},
+        { key: "light", label: "Light/Medium Ranged", ids: [
+          "autoLasgun",
+          "boltGun",
+          "gaussBlaster",
+          "hvyShotgun",
+          "infernoBoltGun",
+          "ionRifle",
+          "neutronBlaster",
+          "pulseCarbine",
+          "shotgun",
+          "shurikenRifle",
+          "teslaCarbine"
+        ]},
+        { key: "special", label: "Special", ids: [
+          "flamer",
+          "grenadeLauncher",
+          "meltaGun",
+          "neutronRailRifle",
+          "plasmaGun",
+          "scopedBigShoota",
+          "shredder",
+          "sniperRifle",
+          "synapticDisintegrator",
+          "warpflamer"
+        ]},
+        { key: "heavy", label: "Heavy", ids: [
+          "eavyRokkitLauncha",
+          "bigShoota",
+          "chaincannon",
+          "fragCannon",
+          "heavyBolter",
+          "heavyStubber",
+          "lascannon",
+          "missileLauncher",
+          "multiMelta",
+          "plasmaCannon",
+          "rokkitLauncha",
+          "shurikenCannon",
+          "soulreaperCannon",
+          "wraithCannon"
+        ]}
+      ];
+
+      // Remember the last open ranged sub-tab during this session
+      var currentRangedCategory = "pistols";
+
+      function getRangedWeaponsForCategory (catKey) {
+        var key = catKey || "pistols";
+        var i, j;
+
+        // Find the category definition
+        var def = null;
+        for (i = 0; i < RANGED_CATEGORIES.length; i++) {
+          if (RANGED_CATEGORIES[i].key === key) { def = RANGED_CATEGORIES[i]; break; }
+        }
+        if (!def) def = RANGED_CATEGORIES[0];
+
+        // Build set of allowed ids
+        var allow = {};
+        for (j = 0; j < def.ids.length; j++) allow[def.ids[j]] = true;
+
+        // Filter
+        var out = [];
+        for (i = 0; i < RANGED_WEAPONS.length; i++) {
+          if (allow[RANGED_WEAPONS[i].id]) out.push(RANGED_WEAPONS[i]);
+        }
+        return out;
+      }
+
+
+
+
+      // FIGHTER ABILITIES (example placeholder)
+      var FIGHTER_ABILITIES = [
+  {
+    id: "counterstrike",
+    name: "Counterstrike",
+    points: 4,
+    effect:
+      "Each time an enemy Fighter deals this Fighter damage from an attack dice in Close Combat, this Fighter deals that Fighter 1 MW."
+  },
+  {
+    id: "terrifying",
+    name: "Terrifying",
+    points: 3,
+    effect:
+      'Enemy Fighters within 1" of this Fighter have -2 to hit in Close Combat.'
+  },
+  {
+    id: "expertGunfighter",
+    name: "Expert Gunfighter",
+    points: 4,
+    effect:
+      "This Fighter can make Shooting attacks with Pistols even while within 1\" of enemy Fighters."
+  },
+  {
+    id: "expertDueller",
+    name: "Expert Dueller",
+    points: 4,
+    effect:
+      "This Fighter’s Close Combat weapons gain Reroll (SR)."
+  },
+  {
+    id: "horrifyingDismemberment",
+    name: "Horrifying Dismemberment",
+    points: 2,
+    effect:
+      "When this Fighter slays an enemy in Close Combat, enemy Fighters within 6\" of the slain Fighter get -1 AP for the rest of the turn."
+  },
+  {
+    id: "experiencedBrawler",
+    name: "Experienced Brawler",
+    points: 2,
+    effect:
+      "This Fighter does not suffer -2 to hit from being outnumbered in CC, and enemies do not gain +2 to hit from outnumbering this Fighter."
+  },
+  {
+    id: "nullPariah",
+    name: "Null / Pariah",
+    points: 5,
+    effect:
+      "This Fighter cannot be targeted by Psychic Powers and cannot be a Psyker. Psykers (friend or foe) within 6\" cannot use Psychic Powers."
+  },
+  {
+    id: "zealot",
+    name: "Zealot",
+    points: 3,
+    effect:
+      "When this Fighter fights in Close Combat after Charging this activation, it gains +1 to hit."
+  },
+  {
+    id: "fast",
+    name: "Fast",
+    points: 2,
+    effect:
+      "This Fighter may perform a free Dash action during its activation (no AP cost)."
+  },
+  {
+    id: "hyperAggressive",
+    name: "Hyper Aggressive",
+    points: 4,
+    effect:
+      "This Fighter may perform either 2 Shooting actions (Pistols/Light/Medium only) or 2 Close Combat actions during its activation."
+  },
+  {
+    id: "gestaltMind",
+    name: "Gestalt Mind",
+    points: 2,
+    effect:
+      "This Fighter may share its AP with other Fighters in the Team that also have Gestalt Mind. When activating a Fighter, you may give 1 AP to another unactivated Gestalt Mind Fighter (max 4 AP on a Fighter)."
+  },
+  {
+    id: "reanimation",
+    name: "Reanimation",
+    points: 4,
+    effect:
+      "When a Fighter with Reanimation is slain, place a token within 1\". At the start of each turn, on 5+ it is reanimated within 1\" with D3+2 HP and may act as normal. A Fighter can only be reanimated once; fail = leave the token and try next turn."
+  },
+  {
+    id: "vengeance",
+    name: "Vengeance",
+    points: 2,
+    effect:
+      "When an enemy slays one of your Fighters, that enemy gains a Vengeance token. Fighters with Vengeance may turn one normal hit into a Crit when attacking an enemy with a Vengeance token. Remove the token when the enemy is slain; Vengeance tokens stack."
+  },
+  {
+    id: "powerFromPain",
+    name: "Power from Pain",
+    points: 2,
+    effect:
+      "This Fighter gains a PfP token each time it injures or slays an enemy. During its activation it may spend PfP to: gain 1 AP (this turn), regain D3+1 HP, or gain Reroll (SR) on all weapons (this turn)."
+  },
+  {
+    id: "ruthless",
+    name: "Ruthless",
+    points: 2,
+    effect:
+      "This Fighter may shoot at enemies locked in Combat. Any failed To Hit rolls of 1–2 hit the friendly model as normal damage."
+  },
+  {
+    id: "regenerate",
+    name: "Regenerate",
+    points: 4,
+    effect:
+      "At the beginning of this Fighter’s activation, it regains D3+1 lost HP."
+  },
+  {
+    id: "extremelyResilient",
+    name: "Extremely Resilient",
+    points: "+33% of HP Stat",
+    dynamicType: "percentHp",
+    dynamicFactor: 1/3,
+    effect:
+      "Whenever this Fighter takes damage from an attack, roll a D12 for each point of damage; on 9+ that point of damage is ignored."
+  },
+  {
+    id: "unfetteredRage",
+    name: "Unfettered Rage",
+    points: 4,
+    effect:
+      "If this Fighter does not score any Critical Hits in Close Combat, you may change one normal hit to a Critical Hit."
+  },
+  {
+    id: "noxiousPresence",
+    name: "Noxious Presence",
+    points: 4,
+    effect:
+      'Enemy Fighters within 3" reduce their DEF by 1. This stacks with other Noxious Presence auras.'
+  },
+  {
+    id: "scarred",
+    name: "Scarred",
+    points: 3,
+    effect:
+      "Once per turn in Close Combat, this Fighter may lose 1 HP to reroll one attack die. If the reroll hits, add +1 Damage; if it misses, the Fighter loses 1 additional HP."
+  },
+  {
+    id: "bornInDarkness",
+    name: "Born in Darkness",
+    points: 5,
+    effect:
+      'This Fighter cannot be targeted by Shooting attacks from 12" or more away, and cannot make Shooting attacks at targets 12" or more away.'
+  },
+  {
+    id: "alchemist",
+    name: "Alchemist",
+    points: 3,
+    effect:
+      "Damage from Poison/Fire tokens applied by this Fighter’s weapons instead deals D3+1 damage."
+  },
+  {
+    id: "trenchWarrior",
+    name: "Trench Warrior",
+    points: 4,
+    effect:
+      "This Fighter can use the Shoot action even while Hidden."
+  },
+  {
+    id: "safeguard",
+    name: "Safeguard",
+    points: 3,
+    effect:
+      "Whenever this Fighter is within proximity of an Objective, its weapons gain Reroll (SR)."
+  },
+  {
+    id: "gunslinger",
+    name: "Gunslinger",
+    points: 4,
+    effect:
+      "1 AP: If this Fighter has not yet used a Shoot action this activation, it may make two free Shooting actions with Pistol weapons."
+  },
+  {
+    id: "headTaker",
+    name: "Head-taker",
+    points: 3,
+    effect:
+      "Whenever this Fighter kills an enemy in Melee, increase Crit Damage for all its Melee weapons by +2 for the rest of the battle."
+  },
+  {
+    id: "overwatch",
+    name: "Overwatch",
+    points: 4,
+    effect:
+      'When an enemy ends a Move within 6" and visible (but not within 1"), this Fighter may immediately Shoot with -2 to hit. Counts as its Counteract action for the turn.'
+  },
+  {
+    id: "endlessHorde",
+    name: "Endless Horde",
+    points: "= HP Stat",
+    dynamicType: "hpStat",
+    dynamicFactor: 1,
+    effect:
+      "Cost equals this Fighter’s current HP stat. When this Fighter dies, at the start of the next turn it returns at your Rearguard Deployment Zone edge. Only for Fighters with 2 AP or less and 10 HP or less."
+  },
+  {
+    id: "volatileExpiration",
+    name: "Volatile Expiration",
+    points: 3,
+    effect:
+      "When this Fighter is slain, you may roll a D12 (subtract 2 if within 1\" of another enemy). On 6+, each Fighter within 2\" suffers D3 MW."
+  },
+  {
+    id: "expendable",
+    name: "Expendable",
+    points: 3,
+    effect:
+      "When this Fighter dies, roll a D12; on 6+ you gain 1 FP."
+  },
+  {
+    id: "agent",
+    name: "Agent",
+    points: 2,
+    effect:
+      "The AP cost of all Interact actions for this Fighter is reduced by 1 (to a minimum of 0)."
+  },
+  {
+    id: "superhumanWarrior",
+    name: "Superhuman Warrior",
+    points: 10,
+    effect:
+      "This Fighter may perform 2 Shooting actions or 2 Close Combat actions in its activation. If using a Special/Heavy weapon, the second Shoot costs 2 AP. When Counteracting, it may perform 2 different actions."
+  }
+];
+
+
+      // LEADER ABILITIES – 0 pts, max 2 selected
+      var LEADER_ABILITIES = [
+        {
+          id: "inspiringPresence",
+          name: "Inspiring Presence",
+          points: 0,
+          effect: '1 AP: Friendly Fighters within 3" of your Leader gain 1 AP until end of turn.'
+        },
+        {
+          id: "masterTactician",
+          name: "Master Tactician",
+          points: 0,
+          effect: "1 AP: You immediately gain 1 FP."
+        },
+        {
+          id: "guidance",
+          name: "Guidance",
+          points: 0,
+          effect: '1 AP: Choose a friendly Fighter within Line of Sight. That Fighter gains 1 AP until end of turn.'
+        },
+        {
+          id: "grizzledVeteran",
+          name: "Grizzled Veteran",
+          points: 0,
+          effect: "As long as this Fighter is on the battlefield, you can use the Tactical Reroll once per turn for 0 FP."
+        },
+        {
+          id: "heroicLeader",
+          name: "Heroic Leader",
+          points: 0,
+          effect: "May use a Feat for free once per turn, but only during this Fighter’s activation."
+        },
+        {
+          id: "giveOrders",
+          name: "Give Orders",
+          points: 0,
+          effect:
+            '1 AP: All friendly Fighters within 6" gain ONE of the following (chosen once for all) until end of turn: +1 to Hit, +1" Charge range, or Hide action for 0 AP.'
+        },
+        {
+          id: "noEscape",
+          name: "No Escape",
+          points: 0,
+          effect:
+            'Enemy Fighters within this Fighter’s melee range reduce their Move by 2" when performing a Fall Back action.'
+        },
+        {
+          id: "getHimMark",
+          name: "Get Him!",
+          points: 0,
+          effect:
+            '1 AP: Select an enemy Fighter within Line of Sight. All shooting attacks against that Fighter gain Reroll (SR) until end of turn.'
+        },
+        {
+          id: "perfectDuellist",
+          name: "Perfect Duellist",
+          points: 0,
+          effect: "This Fighter can defend against Critical Hits in Close Combat using normal Defence rolls."
+        },
+        {
+          id: "implacable",
+          name: "Implacable",
+          points: 0,
+          effect: "This Fighter is immune to Glancing Hits."
+        },
+        {
+          id: "impermeable",
+          name: "Impermeable",
+          points: 0,
+          effect: "This Fighter is immune to effects from the Poison/Fire keyword."
+        },
+        {
+          id: "infernal",
+          name: "Infernal",
+          points: 0,
+          effect:
+            "This Fighter’s weapons gain Poison/Fire. When attacking enemy Fighters that have a Poison/Fire token, the weapon’s Damage values are improved by +1/+1."
+        },
+        {
+          id: "uncontrolledEruption",
+          name: "Uncontrolled Eruption",
+          points: 0,
+          effect:
+            '2 AP: Inflict D3+2 Mortal Wounds to each other Fighter that is within 2" and visible to this Fighter.'
+        },
+        {
+          id: "whispersWarp",
+          name: "Whispers of the Warp",
+          points: 0,
+          effect:
+            'Whenever an opponent activates a Fighter within 6", roll a D6. If the result is higher than that Fighter’s AP, it loses 1 AP for this activation.'
+        },
+        {
+          id: "spiritualPariah",
+          name: "Spiritual Pariah",
+          points: 0,
+          effect:
+            'Enemy Fighters within 6" and visible to this Fighter cannot reroll attack or defence rolls.'
+        },
+        {
+          id: "mercilessOnslaught",
+          name: "Merciless Onslaught",
+          points: 0,
+          effect:
+            "1 AP: Activate before rolling to Hit with a Close Combat attack. For that attack, Glancing Hits deal 2 Damage."
+        },
+        {
+          id: "getHimWarcry",
+          name: "Get Him! (War Cry)",
+          points: 0,
+          effect:
+            '2 AP: All friendly Fighters visible and within 6" gain EITHER (+2\" Move and +2 to Fight) OR (+2 to Shoot) until end of turn. ' +
+            "Can only be used once per battle, and this Fighter is immediately Spent."
+        },
+        {
+          id: "mindOnMission",
+          name: "Mind on the Mission",
+          points: 0,
+          effect:
+            'All friendly Fighters within 6" may use the Interact action for 0 AP.'
+        },
+        {
+          id: "feedOnPain",
+          name: "Feed on Pain",
+          points: 0,
+          effect:
+            "If this Fighter slays an enemy Fighter with an attack, it regains 3 lost HP."
+        }
+      ];
+
+      // SPELLS – no points, CV + layout with breaks
+      var SPELLS = [
+        {
+          id: "tempest",
+          name: "TEMPEST",
+          cv: 13,
+          points: 0,
+          effect:
+            'Range: 16"<br><br>' +
+            'Target suffers D3 MW; roll a D12: on 11–12, push target D6" directly away and Knock Prone (loses 1 AP next activation).<br><br>' +
+            "Power Surge (CV 15): Deals +2 MW before the push."
+        },
+        {
+          id: "graviticMaelstrom",
+          name: "GRAVITIC MAELSTROM",
+          cv: 17,
+          points: 0,
+          effect:
+            'Range: 12", 3" AoE<br><br>' +
+            'All models inside must roll 7+ or be dragged D3" toward the center and suffer D3 MW.<br><br>' +
+            "Power Surge (CV 19): Fighters dragged suffer D3+2 MW."
+        },
+        {
+          id: "spectralChains",
+          name: "SPECTRAL CHAINS",
+          cv: 17,
+          points: 0,
+          effect:
+            'Range: 12"<br><br>' +
+            "Target Fighter may immediately be moved up to 6 inches by the Conjuring Warlocks Player.<br><br>" +
+            "Power Surge (CV 19): Target also suffers 1 MW if it repositions in its own activation this turn."
+        },
+        {
+          id: "stolenSight",
+          name: "STOLEN SIGHT",
+          cv: 12,
+          points: 0,
+          effect:
+            'Range: 12"<br><br>' +
+            "Target suffers –3 to Shoot until end of Round; if Engaged, suffers –2 to Fight instead.<br><br>" +
+            "Power Surge (CV 14): –4 to Shoot, –3 to Fight."
+        },
+        {
+          id: "twistOfWill",
+          name: "TWIST OF WILL",
+          cv: 14,
+          points: 0,
+          effect:
+            'Range: 12"<br><br>' +
+            "Target must reroll all successful attack rolls on its next activation.<br><br>" +
+            "Power Surge (CV 16): Target also cannot Charge until next turn."
+        },
+        {
+          id: "voidfireBlast",
+          name: "VOIDFIRE BLAST",
+          cv: 18,
+          points: 0,
+          effect:
+            'Range: 12"<br><br>' +
+            "Pick any point. All models within 2\" suffer 2D3 MW. Psyker suffers 1 MW.<br><br>" +
+            "Power Surge (CV 20): Radius becomes 4\"."
+        },
+        {
+          id: "blazingWind",
+          name: "BLAZING WIND",
+          cv: 13,
+          points: 0,
+          effect:
+            'Range: 12"<br><br>' +
+            'Target suffers D3 Damage and is moved 2" directly away.<br><br>' +
+            "Power Surge (CV 15): D3+1 Damage and 4\" push."
+        },
+        {
+          id: "fireblast",
+          name: "FIREBLAST",
+          cv: 13,
+          points: 0,
+          effect:
+            'Range: 12"<br><br>' +
+            "Target suffers D3+1 Damage.<br><br>" +
+            "Power Surge (CV 15): Target also gains a Fire token."
+        },
+        {
+          id: "lightningBolt",
+          name: "LIGHTNING BOLT",
+          cv: 15,
+          points: 0,
+          effect:
+            "Range: —<br><br>" +
+            "Target suffers D3+2 MW.<br><br>" +
+            "Power Surge (CV 17): D3+3 MW."
+        },
+        {
+          id: "mendFlesh",
+          name: "MEND FLESH",
+          cv: 10,
+          points: 0,
+          effect:
+            'Range: 12"<br><br>' +
+            "Restore D3+1 HP to a friendly Fighter.<br><br>" +
+            "Power Surge (CV 12): Restore D3+2 HP and remove 1 Poison/Burning token."
+        },
+        {
+          id: "circleOfWarding",
+          name: "CIRCLE OF WARDING",
+          cv: 11,
+          points: 0,
+          effect:
+            'Range: 3" aura<br><br>' +
+            "Friendly Fighters inside gain +2 DEF (max 5+) and cannot be Charged this turn.<br><br>" +
+            "Power Surge (CV 13): Circle lasts until next activation."
+        },
+        {
+          id: "arcaneAegis",
+          name: "ARCANE AEGIS",
+          cv: 13,
+          points: 0,
+          effect:
+            'Range: 6"<br><br>' +
+            "Target gains +2 DEF (max 5+) until next turn.<br><br>" +
+            "Power Surge (CV 15): Target ignores first 2 Damage from next attack."
+        },
+        {
+          id: "spectralDecoy",
+          name: "SPECTRAL DECOY",
+          cv: 12,
+          points: 0,
+          effect:
+            "Range: Self<br><br>" +
+            "First attack against the Psyker before next activation automatically misses.<br><br>" +
+            "Power Surge (CV 14): On 5+, reflect that missed ranged attack for D3 Damage."
+        },
+        {
+          id: "soulflameSurge",
+          name: "SOULFLAME SURGE",
+          cv: 16,
+          points: 0,
+          effect:
+            'Range: 12"<br><br>' +
+            'A friendly Fighter gains +1 ATK and “Crits on 9+” on CC weapons until end of Turn.<br><br>' +
+            "Power Surge (CV 16): Affect two Fighters instead of one."
+        },
+        {
+          id: "veilOfShadows",
+          name: "VEIL OF SHADOWS",
+          cv: 14,
+          points: 0,
+          effect:
+            'Range: 6"<br><br>' +
+            "Target becomes Hidden, removed from engagement, placed up to 3\" away from enemies.<br><br>" +
+            "Power Surge (CV 16): Target may act normally; remove Hidden immediately."
+        },
+        {
+          id: "reanimateTheDead",
+          name: "REANIMATE THE DEAD",
+          cv: 16,
+          points: 0,
+          effect:
+            "Range: Self (3\" placement)<br><br>" +
+            "Summon a Shambling Corpse (HP4, Move4\", Fight9+, AP1, ATK3, DMG2/3).<br><br>" +
+            "Power Surge (CV 18): Summon two instead."
+        },
+        {
+          id: "phantasmalHorror",
+          name: "PHANTASMAL HORROR",
+          cv: 15,
+          points: 0,
+          effect:
+            'Range: 12"<br><br>' +
+            "Target must roll ≤ AP×2 on D12 or cannot Charge/move closer this turn.<br><br>" +
+            "Power Surge (CV 17): Must roll ≤ AP instead."
+        },
+        {
+          id: "siphonLife",
+          name: "SIPHON LIFE",
+          cv: 14,
+          points: 0,
+          effect:
+            'Range: 8"<br><br>' +
+            "Target suffers D3 MW; Psyker heals the same amount.<br><br>" +
+            "Power Surge (CV 16): D3+2 MW/heal."
+        },
+        {
+          id: "veilOfSouls",
+          name: "VEIL OF SOULS",
+          cv: 16,
+          points: 0,
+          effect:
+            "Range: Self<br><br>" +
+            "Until next activation, Psyker gains +1 DEF; enemies within 3\" suffer –1 to Hit.<br><br>" +
+            "Power Surge (CV 18): Psyker instead gains +2 DEF."
+        },
+        {
+          id: "etherealBody",
+          name: "ETHEREAL BODY",
+          cv: 12,
+          points: 0,
+          effect:
+            "Range: Self<br><br>" +
+            "Move through models and terrain (cannot end inside them or within 1\" of enemies unless Charging).<br><br>" +
+            "Power Surge (CV 14): Also gain +2 DEF until next turn."
+        }
+      ];
+
+      // EQUIPMENT (unchanged from previous working version)
+      var EQUIPMENT = [
+        {
+          id: "healingPotions",
+          name: "Healing Potions (+)",
+          points: 4,
+          effect: '1 AP: Friendly Fighter within 1" regains 2D3 lost HP.'
+        },
+        {
+          id: "spotterFamiliar",
+          name: "Spotter Familiar",
+          points: 4,
+          effect: "1 AP: Mark an enemy in LoS. Shooting vs that Fighter gains Reroll (SR) until next turn."
+        },
+        {
+          id: "teleportArtifact",
+          name: "Magical Teleport Artifact (+)",
+          points: "+50% Stat cost",
+          dynamicType: "percentStats",
+          dynamicFactor: 0.5,
+          effect:
+            '1 AP: Reposition up to 12", ignoring terrain/height. Then roll D12; on 1–2 suffer D3 MW and may take no further actions this activation.'
+        },
+        {
+          id: "flightDevice",
+          name: "Magical Flight / Aerial Device / Wings",
+          points: "+33% Stat cost",
+          dynamicType: "percentStats",
+          dynamicFactor: 1/3,
+          effect:
+            'Gains Jump Move: +3" Move and may ignore terrain and vertical height when repositioning.'
+        },
+        {
+          id: "banner",
+          name: "Banner (+)",
+          points: 2,
+          effect: 'Friendly Fighters within 3" gain +1 to Hit with CC and Shooting attacks.'
+        },
+        {
+          id: "bomb",
+          name: "Bomb (+)",
+          points: 6,
+          effect:
+            "Once per game plant an Explosive Device while moving. 1 AP to detonate: ATK 4, Hit 2+, DMG 5/6, Piercing (-2), Blast (2\")."
+        },
+        {
+          id: "climbingEquipment",
+          name: "Climbing Equipment",
+          points: 2,
+          effect: 'Ignore the first 2" of vertical repositioning.'
+        },
+        {
+          id: "ancientRelic",
+          name: "Ancient Relic (+)",
+          points: 3,
+          effect: "User may ignore 1 normal damage attack per game."
+        },
+        {
+          id: "enchantedCloak",
+          name: "Enchanted Cloak",
+          points: 4,
+          effect:
+            "User gains -1 to be hit when in Cover or Hidden (stacks with Cover/Hidden)."
+        },
+        {
+          id: "arcaneShield",
+          name: "Arcane Shield (+)",
+          points: 5,
+          effect: "User gains a 9+ Aegis save."
+        },
+        {
+          id: "enhancingPotions",
+          name: "Enhancing Potions",
+          points: 4,
+          effect:
+            "At start of activation choose: (1) Heal 2D3 HP, (2) Reroll (SR) on CC attacks this turn, or (3) +2\" Move this turn."
+        },
+        {
+          id: "rareArcaneShield",
+          name: "Rare Arcane Shield (+)",
+          points: 10,
+          effect: "User gains a 7+ Aegis save."
+        },
+        {
+          id: "heavilyMuscled",
+          name: "Heavily Muscled",
+          points: 3,
+          effect: "User’s Heavy Weapons gain the “Heavy (Move)” Special Rule."
+        },
+        {
+          id: "arcaneFamiliar",
+          name: "Arcane Familiar",
+          points: 4,
+          effect:
+            "1 AP: Mark an enemy in LoS. Shooting vs that Fighter ignores negative To Hit modifiers from Light Cover and Hidden until end of turn."
+        },
+        {
+          id: "warHorn",
+          name: "War Horn / Instrument (+)",
+          points: 4,
+          effect: '1 AP: Grant a friendly Fighter within 9" +1 AP this round.'
+        },
+        {
+          id: "ringOfProtection",
+          name: "Ring of Protection (+)",
+          points: 4,
+          effect:
+            "User and friendly Fighters within 2\" reduce Piercing of enemy Shooting attacks by 2."
+        },
+        {
+          id: "breachingRam",
+          name: "Breaching Ram (+)",
+          points: 5,
+          effect:
+            'Treat any wall <1" thick as Accessible Terrain (may move through at cost of 1" Move).'
+        },
+        {
+          id: "clawedGloves",
+          name: "Clawed Gloves (+)",
+          points: 2,
+          effect:
+            "At the start of this Fighter’s CC activation, deal 2 MW to the engaged enemy Fighter."
+        },
+        {
+          id: "magicalShield",
+          name: "Magical Shield (+)",
+          points: 5,
+          effect:
+            "User gains a 7+ Aegis save and 4 Defense dice in CC when using this shield. May only have Pistol and/or CC weapons as ranged options."
+        },
+        {
+          id: "artifactOfDisruption",
+          name: "Artifact of Disruption (+)",
+          points: 5,
+          effect:
+            "1 AP: Select a visible enemy Fighter; that Fighter must be activated last by your opponent this turn."
+        },
+        {
+          id: "grapplingHookGun",
+          name: "Grappling Hook Gun (+)",
+          points: 5,
+          effect:
+            '1 AP Move action: Place this Fighter within 1" of a chosen visible point on terrain, not within 1" of enemies. This Fighter may not have any Ranged Weapons.'
+        },
+        {
+          id: "macabreMemento",
+          name: "Macabre Memento (+)",
+          points: 6,
+          effect:
+            'While visible and within 3" of enemy Fighters, those Fighters reduce the Attack characteristic of their Melee and Ranged weapons by 1.'
+        },
+        {
+          id: "spottingTelescope",
+          name: "Spotting Telescope (+)",
+          points: 5,
+          effect: "Gain 1 extra FP at the start of the battle."
+        },
+        {
+          id: "blessedAmmunition",
+          name: "Blessid / Tainted Ammunition (+)",
+          points: 5,
+          effect:
+            "Add +1 to both Damage values of this Fighter’s Ranged weapons. Cannot be used on Heavy Weapons."
+        },
+        {
+          id: "cannonsBehindLines",
+          name: "Cannons Behind the Lines (+)",
+          points: 14,
+          effect:
+            'Gain an additional Ranged weapon: Cannon Strike – ATK 4, Hit 6+, DMG 3/5, Blast (2"), Heavy (Dash), may be used while Hidden.'
+        },
+        {
+          id: "telescopicSight",
+          name: "Telescopic Sight",
+          points: 3,
+          effect:
+            'This Fighter’s Ranged weapons with “Rng X” gain +1" range (except Flamers and Grenades).'
+        },
+        {
+          id: "rope",
+          name: "Rope",
+          points: 3,
+          effect: "This Fighter ignores vertical height when dropping down."
+        },
+        {
+          id: "gorgetProtection",
+          name: "Gorget Protection",
+          points: 4,
+          effect:
+            "Enemy Fighters can only score Critical Hits on 11+ in CC against this Fighter."
+        },
+        {
+          id: "scoutingIntel",
+          name: "Scouting Intel",
+          points: 4,
+          effect:
+            "Once per battle you may reroll the initiative roll. With Random Activation, return the drawn token and pull another."
+        },
+        {
+          id: "voltaicSuit",
+          name: "Voltaic Suit",
+          points: 5,
+          effect:
+            'Whenever an enemy Fighter moves within 1", roll 3D12; for each 9+ that enemy suffers 1 MW.'
+        }
+      ];
+
+      // FIGHTER STATE
+      var fighter = {
+        name: "",
+        stats: {},
+        ccWeapons: [],
+        rangedWeapons: [],
+        abilities: [],
+        leaderAbilities: [],
+        spells: [],
+        equipment: [],
+        isWarlock: false,
+        isMasterWarlock: false,
+        points: {
+          base: 16,
+          stats: 0,
+          warlock: 0,
+          ccWeapons: 0,
+          rangedWeapons: 0,
+          abilities: 0,
+          leaderAbilities: 0,
+          spells: 0,
+          equipment: 0
+        }
+      };
+
+      // TOTALS
+      function computeTotal () {
+        return fighter.points.base +
+               fighter.points.stats +
+               fighter.points.warlock +
+               fighter.points.ccWeapons +
+               fighter.points.rangedWeapons +
+               fighter.points.abilities +
+               fighter.points.leaderAbilities +
+               fighter.points.spells +
+               fighter.points.equipment;
+      }
+
+      function refreshTotal () {
+        var el = document.getElementById("totalPoints");
+        if (el) el.textContent = computeTotal();
+      }
+
+      // SUMMARY
+      function updateSummary () {
+        var container = document.getElementById("section-summary");
+        if (!container) return;
+
+        var html = '<div class="card"><h2>Summary</h2>';
+
+        html += "<p>";
+        html += "Base: " + fighter.points.base + " pts";
+        html += " · Stats: " + fighter.points.stats + " pts";
+        html += " · Psyker: " + fighter.points.warlock + " pts";
+        html += " · CC Weapons: " + fighter.points.ccWeapons + " pts";
+        html += " · Ranged Weapons: " + fighter.points.rangedWeapons + " pts";
+        html += "<br>";
+        html += "Abilities: " + fighter.points.abilities + " pts";
+        html += " · Leader Abilities: " + fighter.points.leaderAbilities + " pts";
+        html += " · Psychic Powers: " + fighter.points.spells + " pts";
+        html += " · Equipment: " + fighter.points.equipment + " pts";
+        html += "<br><span style='color:#f97316;'>Total: " + computeTotal() + " pts</span>";
+        html += "</p>";
+
+
+        html += "<div class='summary-pill' style='margin-top:0.25rem;'>";
+        html += "<div class='summary-category-title'>Stats</div>";
+        html += "<div style='display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.35rem;'>";
+        for (var si = 0; si < STAT_CONFIG.length; si++) {
+          var scfg = STAT_CONFIG[si];
+          var v = fighter.stats[scfg.key];
+          html += "<div style='background:#141619;border:1px solid #2a2d31;border-radius:12px;padding:0.35rem 0.55rem;min-width:78px;text-align:center;'>";
+          html += "<div style='font-size:0.72rem; letter-spacing:0.04em; text-transform:uppercase; color:#9aa1a8;'>" + scfg.label + "</div>";
+          html += "<div style='font-weight:700; font-size:1.05rem; margin-top:0.05rem;'>" + v + (scfg.unit || "") + "</div>";
+          html += "</div>";
+        }
+        html += "</div>";
+
+        // Psyker status
+        var psyLabel = fighter.isMasterWarlock ? "Master Psyker" : (fighter.isWarlock ? "Psyker" : "None");
+        html += "<div style='margin-top:0.6rem; display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;'>";
+        html += "<div style='background:#141619;border:1px solid #2a2d31;border-radius:12px;padding:0.35rem 0.55rem;min-width:140px;'>";
+        html += "<div style='font-size:0.72rem; letter-spacing:0.04em; text-transform:uppercase; color:#9aa1a8;'>Psyker</div>";
+        html += "<div style='font-weight:700; font-size:1.02rem; margin-top:0.05rem;'>" + psyLabel + "</div>";
+        html += "</div>";
+        html += "</div>";
+
+        html += "<div style='display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.6rem;'>";        html += "<button class='tab-pill-colour' onclick='copyFighterText()'>Copy Text</button>";
+        
+        html += "<button class=\'tab-pill-colour\' onclick=\'printFighterCard\(\)\'>Print Card</button>";
+html += "</div>";
+        html += "<p style='margin:0.45rem 0 0; font-size:0.82rem; color:#9ca3af;'>Tip: Use <b>Copy Text</b> to paste into a document or <b>Print Card</b> to generate a simple Fighter Card.</p>";
+        html += "</div>";
+
+        function renderList(title, arr) {
+  html += '<div class="summary-pill">';
+  html += '<div class="summary-category-title">' + title + '</div>';
+
+  if (!arr || !arr.length) {
+    html += "<p style='font-size:0.9rem; color:#9ca3af; margin:0;'>None</p>";
+  } else {
+    html += "<ul style='padding-left:1.1rem; margin:0; font-size:0.9rem;'>";
+    for (var i = 0; i < arr.length; i++) {
+      var x = arr[i];
+      var main = x.profile || x.effect || "";
+      var pts = x.points || 0;
+      html += "<li style='margin-bottom:0.15rem;'>" +
+              x.name + " (" + pts + " pts)" +
+              (main ? " — " + main : "") +
+              "</li>";
+    }
+    html += "</ul>";
+  }
+
+  html += "</div>";
+}
+
+
+        renderList("Close Combat Weapons", fighter.ccWeapons);
+        renderList("Ranged Weapons",        fighter.rangedWeapons);
+        renderList("Fighter Abilities",     fighter.abilities);
+        renderList("Leader Abilities",      fighter.leaderAbilities);
+        renderList("Psychic Powers",                fighter.spells);
+        renderList("Equipment",             fighter.equipment);
+
+        html += "</div>";
+        container.innerHTML = html;
+
+        // Name input handler
+        var nameInput = document.getElementById("fighter-name-input");
+        if (nameInput) {
+          nameInput.value = fighter.name || "";
+          var __nameDebounce = null;
+          nameInput.addEventListener("input", function () {
+            fighter.name = this.value || "";
+            if (__nameDebounce) clearTimeout(__nameDebounce);
+            __nameDebounce = setTimeout(function () {
+              updateSummary();
+            }, 150);
+          });
+          // Also update on blur (useful if paste happens)
+          nameInput.addEventListener("blur", function () {
+            fighter.name = this.value || "";
+            updateSummary();
+          });
+        }
+}
+
+            // ===== Copy Build Text =====
+      function buildExportText () {
+        var lines = [];
+        var nm = (fighter.name && fighter.name.trim()) ? fighter.name.trim() : "Fighter";
+        lines.push(nm + " — " + computeTotal() + " pts");
+        lines.push("");
+
+        // Stats line
+        var statBits = [];
+        for (var i = 0; i < STAT_CONFIG.length; i++) {
+          var sc = STAT_CONFIG[i];
+          statBits.push(sc.label + " " + fighter.stats[sc.key] + (sc.unit || ""));
+        }
+        lines.push(statBits.join(" · "));
+
+        // Psyker state
+        var psyLabel = fighter.isMasterWarlock ? "Master Psyker" : (fighter.isWarlock ? "Psyker" : "None");
+        lines.push("Psyker: " + psyLabel);
+        lines.push("");
+
+        function listBlock (title, arr) {
+          lines.push(title + ":");
+          if (!arr || !arr.length) {
+            lines.push("  - None");
+            lines.push("");
+            return;
+          }
+          for (var j = 0; j < arr.length; j++) {
+            var x = arr[j];
+            var main = x.profile || x.effect || "";
+            var pts = x.points || 0;
+            lines.push("  - " + x.name + " (" + pts + " pts)" + (main ? " — " + main : ""));
+          }
+          lines.push("");
+        }
+
+        listBlock("Close Combat Weapons", fighter.ccWeapons);
+        listBlock("Ranged Weapons", fighter.rangedWeapons);
+        listBlock("Fighter Abilities", fighter.abilities);
+        listBlock("Leader Abilities", fighter.leaderAbilities);
+        listBlock("Psychic Powers", fighter.spells);
+        listBlock("Equipment", fighter.equipment);
+
+        lines.push("Breakdown: Base " + fighter.points.base + " · Stats " + fighter.points.stats + " · Psyker " + fighter.points.warlock +
+                   " · CC " + fighter.points.ccWeapons + " · Ranged " + fighter.points.rangedWeapons +
+                   " · Abilities " + fighter.points.abilities + " · Leader " + fighter.points.leaderAbilities +
+                   " · Psychic " + fighter.points.spells + " · Equipment " + fighter.points.equipment);
+
+        return lines.join("\n");
+      }
+
+      // Exposed to onclick handlers
+      
+      // ===== Print-friendly Card =====
+      window.printFighterCard = function () {
+        try {
+          var nm = (fighter.name && fighter.name.trim()) ? fighter.name.trim() : "Fighter";
+          var total = computeTotal();
+          var psyLabel = fighter.isMasterWarlock ? "Master Psyker" : (fighter.isWarlock ? "Psyker" : "None");
+
+          function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+          function listHtml(title, arr) {
+            var out = `<div class="block"><div class="block-title">${esc(title)}</div>`;
+            if (!arr || !arr.length) return out + `<div class="muted">None</div></div>`;
+            out += `<ul>`;
+            for (var i=0;i<arr.length;i++){
+              var x=arr[i];
+              var pts = x.points || 0;
+
+              // Turn stored <br> tags (and any newlines) into real HTML line breaks on the printed card
+              var mainRaw = (x.profile || x.effect || "");
+              mainRaw = String(mainRaw)
+                .replace(/<br\b[^>]*>/gi, "\n")
+                .replace(/<br</gi, "\n")
+                .replace(/\r\n/g, "\n");
+
+              var rulesHtml = esc(mainRaw).replace(/\n+/g, "<br>");
+
+              out += `<li><b>${esc(x.name)}</b> <span class="muted">(${pts} pts)</span>`;
+              if (mainRaw) out += `<br><span class="muted">${rulesHtml}</span>`;
+              out += `</li>`;
+            }
+            out += `</ul></div>`;
+            return out;
+          }var stats = [];
+          for (var i=0;i<STAT_CONFIG.length;i++){
+            var sc=STAT_CONFIG[i];
+            stats.push(`<span class="stat"><span class="k">${esc(sc.label)}</span> <span class="v">${esc(fighter.stats[sc.key] + (sc.unit||""))}</span></span>`);
+          }
+
+          var doc = `<!doctype html><html><head><meta charset="utf-8"><title>${esc(nm)} — ${total} pts</title>
+<style>
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:20px;color:#111;background:#fff;}
+.card{border:2px solid #111;border-radius:14px;padding:16px;max-width:900px;}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+.name{font-size:26px;font-weight:800;}
+.pts{font-size:18px;font-weight:800;padding:6px 10px;border:2px solid #111;border-radius:12px;white-space:nowrap;}
+.meta{margin-top:6px;font-size:13px;color:#333;}
+.stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+.stat{border:1px solid #111;border-radius:10px;padding:6px 8px;min-width:84px;text-align:center;}
+.stat .k{display:block;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:#444;}
+.stat .v{display:block;font-size:16px;font-weight:800;margin-top:2px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
+.block{border:1px solid #111;border-radius:12px;padding:10px;}
+.block-title{font-weight:900;margin-bottom:6px;}
+ul{margin:0;padding-left:18px;}
+li{margin-bottom:6px;}
+.muted{color:#555;font-size:12px;}
+@media print{body{margin:0} .card{border:none;border-radius:0}}
+</style></head><body>
+<div class="card">
+  <div class="top">
+    <div>
+      <div class="name">${esc(nm)}</div>
+      <div class="meta">Psyker: <b>${esc(psyLabel)}</b></div>
+    </div>
+    <div class="pts">${total} pts</div>
+  </div>
+  <div class="stats">${stats.join("")}</div>
+  <div class="grid">
+    ${listHtml("Close Combat Weapons", fighter.ccWeapons)}
+    ${listHtml("Ranged Weapons", fighter.rangedWeapons)}
+    ${listHtml("Fighter Abilities", fighter.abilities)}
+    ${listHtml("Leader Abilities", fighter.leaderAbilities)}
+    ${listHtml("Psychic Powers", fighter.spells)}
+    ${listHtml("Equipment", fighter.equipment)}
+  </div>
+</div>
+<script>window.onload=function(){window.print();};<\/script>
+</body></html>`;
+
+          var w = window.open("", "_blank");
+          if (!w) { alert("Popup blocked — allow popups to print the card."); return; }
+          w.document.open();
+          w.document.write(doc);
+          w.document.close();
+        } catch (e) {
+          alert("Print failed: " + e);
+        }
+      };
+
+
+window.copyFighterText = function () {
+  try {
+    var txt = buildExportText();
+
+    // Convert any HTML line breaks to real ones (safety pass)
+    txt = txt.replace(/<br\s*\/?>/gi, "\n");
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(function(){
+        alert("Copied!");
+      }).catch(function(){
+        window.prompt("Copy this text:", txt);
+      });
+    } else {
+      window.prompt("Copy this text:", txt);
+    }
+  } catch (e) {
+    alert("Copy failed: " + e);
+  }
+};
+
+
+      // STAT COST
+      function recalcStatCost () {
+        var total = 0;
+        for (var i = 0; i < STAT_CONFIG.length; i++) {
+          var cfg = STAT_CONFIG[i];
+          var base = cfg.base;
+          var cur = fighter.stats[cfg.key];
+          if (cur === base) continue;
+          var step = (cur > base) ? 1 : -1;
+          var lowerIsBetter = !!cfg.lowerIsBetter;
+
+          for (var v = base; v !== cur; v += step) {
+            var next = v + step;
+            var improving = lowerIsBetter ? (next < v) : (next > v);
+            if (improving) {
+              total += cfg.upCost || 0;
+            } else {
+              total -= cfg.downCost || 0;
+            }
+          }
+        }
+        fighter.points.stats = total;
+      }
+
+      // WARLOCK COST – 50% / 66% of (base + stat adjustments)
+      function recalcWarlockCost () {
+        var baseline = (fighter.points.base || 0) + (fighter.points.stats || 0);
+        if (baseline < 0) {
+          baseline = 0;
+        }
+
+        if (fighter.isMasterWarlock) {
+          fighter.points.warlock = Math.ceil(baseline * 0.66);
+        } else if (fighter.isWarlock) {
+          fighter.points.warlock = Math.ceil(baseline * 0.5);
+        } else {
+          fighter.points.warlock = 0;
+        }
+      }
+
+      // Build profile string with upgrades included
+      function buildWeaponProfile (weapon) {
+        var baseText = weapon.baseProfile || weapon.profile || "";
+        var text = baseText;
+        var extras = [];
+        var up = weapon.upgrades || {};
+        if (up.poison)        extras.push("Poison/Fire");
+        if (up.enchanted)     extras.push("Crits on 9+");
+        if (up.cursed)        extras.push("MW (2)");
+        if (up.truestrike)        extras.push("Reroll (SR)");
+        if (up.masterCrafted) extras.push("Piercing (-2)");
+
+        if (extras.length) {
+          if (text) {
+            text += ", " + extras.join(", ");
+          } else {
+            text = extras.join(", ");
+          }
+        }
+        weapon.profile = text; // keep summary in sync
+        return text;
+      }
+
+                 // INIT STATS SECTION (with Psyker toggles + floating Total Points)
+      function initStats () {
+        var container = document.getElementById("section-stats");
+        if (!container) return;
+
+        var i, cfg;
+        // Initialize stats to base values
+        for (i = 0; i < STAT_CONFIG.length; i++) {
+          cfg = STAT_CONFIG[i];
+          fighter.stats[cfg.key] = cfg.base;
+        }
+
+        var html = '<div class="card"><h2>Core Stats</h2>';
+
+        
+
+        // Fighter name
+        html += '<div style="margin-bottom:0.65rem; margin-top:0.15rem;">';
+        html += '  <div style="font-size:0.75rem; text-transform:uppercase; color:#9aa1a8; margin-bottom:0.15rem;">Fighter Name</div>';
+        html += '  <input id="fighter-name-input" type="text" placeholder="Enter name..." style="width:100%; padding:0.4rem 0.6rem; border-radius:8px; border:1px solid #2a2d31; background:#141619; color:#e5e7eb;">';
+        html += '</div>';
+
+// 🔹 Floating Total Points pill in the top-right of this card
+        html += ''
+          + '<div class="points-box-inline stats-total-floating">'
+          + '  Total Points: <span id="totalPoints">0</span>'
+          + '</div>';
+
+        // Stat pills
+        html += '<div class="stats-row">';
+        for (i = 0; i < STAT_CONFIG.length; i++) {
+          cfg = STAT_CONFIG[i];
+          html += ''
+            + '<div class="stat-pill" data-key="' + cfg.key + '">'
+            + '  <div class="stat-pill-label">' + cfg.label + '</div>'
+            + '  <div class="stat-pill-controls">'
+            + '    <button class="stat-btn-vert stat-up">▲</button>'
+            + '    <div class="stat-pill-value"><span class="value-text">' + cfg.base + '</span>' + cfg.unit + '</div>'
+            + '    <button class="stat-btn-vert stat-down">▼</button>'
+            + '  </div>'
+            + '</div>';
+        }
+        html += '</div>'; // end .stats-row
+
+        // Psyker section
+        html += ''
+          + '<div class="warlock-box">'
+          + '  <label class="warlock-option">'
+          + '    <input type="checkbox" class="warlock-toggle" data-type="warlock"> Psyker (+50% of Stat cost)'
+          + '  </label>'
+          + '  <label class="warlock-option">'
+          + '    <input type="checkbox" class="warlock-toggle" data-type="master"> Master Psyker (+66% of Stat cost)'
+          + '  </label>'
+          + '  <div class="warlock-note">'
+          + '    Warlocks gain access to spells. Only one of these options may be active.'
+          + '  </div>'
+          + '</div>';
+
+        html += '</div>'; // end .card
+        container.innerHTML = html;
+
+        // --- Stat pill handlers ---
+        var pills = container.getElementsByClassName("stat-pill");
+
+        function attachHandlers (pill) {
+          var key = pill.getAttribute("data-key");
+          var cfgLocal = null;
+          for (var j = 0; j < STAT_CONFIG.length; j++) {
+            if (STAT_CONFIG[j].key === key) {
+              cfgLocal = STAT_CONFIG[j];
+              break;
+            }
+          }
+          if (!cfgLocal) return;
+
+          var valueEl = pill.querySelector(".value-text");
+          var upBtn = pill.querySelector(".stat-up");
+          var downBtn = pill.querySelector(".stat-down");
+
+          upBtn.addEventListener("click", function () {
+            var val = fighter.stats[key];
+            if (val < cfgLocal.max) {
+              fighter.stats[key] = val + 1;
+              valueEl.textContent = fighter.stats[key];
+              recalcStatCost();
+              recalcWarlockCost();
+              recalcAbilityPoints(); // updates dynamic equipment
+              refreshTotal();
+              updateSummary();
+            }
+          });
+
+          downBtn.addEventListener("click", function () {
+            var val = fighter.stats[key];
+            if (val > cfgLocal.min) {
+              fighter.stats[key] = val - 1;
+              valueEl.textContent = fighter.stats[key];
+              recalcStatCost();
+              recalcWarlockCost();
+              recalcAbilityPoints(); // updates dynamic equipment
+              refreshTotal();
+              updateSummary();
+            }
+          });
+        }
+
+        for (var p = 0; p < pills.length; p++) {
+          attachHandlers(pills[p]);
+        }
+
+        // --- Psyker toggles ---
+        var warlockToggles = container.getElementsByClassName("warlock-toggle");
+
+        function syncWarlock () {
+          for (var w = 0; w < warlockToggles.length; w++) {
+            var input = warlockToggles[w];
+            var type = input.getAttribute("data-type");
+            if (type === "warlock") {
+              input.checked = !!fighter.isWarlock && !fighter.isMasterWarlock;
+            } else {
+              input.checked = !!fighter.isMasterWarlock;
+            }
+          }
+        }
+
+        for (var w2 = 0; w2 < warlockToggles.length; w2++) {
+          (function (input) {
+            input.addEventListener("change", function () {
+              var type = input.getAttribute("data-type");
+              if (type === "warlock") {
+                fighter.isWarlock = input.checked;
+                if (input.checked) fighter.isMasterWarlock = false;
+              } else {
+                fighter.isMasterWarlock = input.checked;
+                if (input.checked) fighter.isWarlock = false;
+              }
+              recalcWarlockCost();
+              recalcAbilityPoints(); // dynamic eq baseline
+              syncWarlock();
+              refreshTotal();
+              updateSummary();
+            });
+          })(warlockToggles[w2]);
+        }
+
+        // Initial calculations
+        recalcStatCost();
+        recalcWarlockCost();
+        recalcAbilityPoints();
+        syncWarlock();
+        refreshTotal();
+        updateSummary();
+      }
+
+
+
+      // Compute upgrade cost for a single weapon
+      function computeWeaponUpgradeCost (weapon) {
+        if (!weapon.upgrades) return 0;
+        var count = 0;
+        if (weapon.upgrades.poison)        count++;
+        if (weapon.upgrades.enchanted)     count++;
+        if (weapon.upgrades.cursed)        count++;
+        if (weapon.upgrades.truestrike)    count++;
+        if (weapon.upgrades.masterCrafted) count++;
+        if (count === 0) return 0;
+        return 2 + (count - 1) * 4; // first = 2, others = 4
+      }
+
+      // WEAPON COST (base + upgrades)
+      function recalcWeaponPoints () {
+        var sumCC = 0;
+        var sumR = 0;
+        var i;
+
+        for (i = 0; i < fighter.ccWeapons.length; i++) {
+          var wc = fighter.ccWeapons[i];
+          var base = (wc.basePoints != null) ? wc.basePoints : wc.points;
+          var upgCost = computeWeaponUpgradeCost(wc);
+          wc.points = base + upgCost;
+          sumCC += wc.points;
+        }
+
+        for (i = 0; i < fighter.rangedWeapons.length; i++) {
+          var rw = fighter.rangedWeapons[i];
+          var baseR = (rw.basePoints != null) ? rw.basePoints : rw.points;
+          var upgCostR = computeWeaponUpgradeCost(rw);
+          rw.points = baseR + upgCostR;
+          sumR += rw.points;
+        }
+
+        fighter.points.ccWeapons = sumCC;
+        fighter.points.rangedWeapons = sumR;
+      }
+
+      // ABILITY / SPELL / EQUIPMENT COST
+      // ABILITY / SPELL / EQUIPMENT COST
+      function recalcAbilityPoints () {
+        var i, sumA = 0, sumL = 0, sumS = 0, sumE = 0;
+
+        // Fighter Abilities (some with dynamic HP-based cost)
+        for (i = 0; i < fighter.abilities.length; i++) {
+          var ab = fighter.abilities[i];
+          var p = 0;
+
+          if (ab.dynamicType === "percentHp") {
+            var hp = fighter.stats.hp || 0;
+            var factor = ab.dynamicFactor || 0;
+            p = Math.ceil(hp * factor);
+            ab.points = p; // keep stored value updated
+          } else if (ab.dynamicType === "hpStat") {
+            var hp2 = fighter.stats.hp || 0;
+            var factor2 = (ab.dynamicFactor != null) ? ab.dynamicFactor : 1;
+            p = Math.round(hp2 * factor2);
+            ab.points = p;
+          } else {
+            p = ab.points || 0;
+          }
+
+          sumA += p;
+        }
+
+        // Leader Abilities (all 0)
+        for (i = 0; i < fighter.leaderAbilities.length; i++) {
+          sumL += fighter.leaderAbilities[i].points || 0;
+        }
+
+        // Psychic Powers (all 0)
+        for (i = 0; i < fighter.spells.length; i++) {
+          sumS += fighter.spells[i].points || 0;
+        }
+
+        // Equipment (with dynamic items)
+        var baseline = (fighter.points.base || 0) + (fighter.points.stats || 0);
+        if (baseline < 0) baseline = 0;
+
+        for (i = 0; i < fighter.equipment.length; i++) {
+          var eq = fighter.equipment[i];
+          var ep = 0;
+          if (eq.dynamicType === "percentStats") {
+            var factorEq = eq.dynamicFactor || 0;
+            ep = Math.ceil(baseline * factorEq);
+            eq.points = ep;
+          } else {
+            ep = eq.points || 0;
+          }
+          sumE += ep;
+        }
+
+        fighter.points.abilities       = sumA;
+        fighter.points.leaderAbilities = sumL;
+        fighter.points.spells          = sumS;
+        fighter.points.equipment       = sumE;
+
+        // 🔑 Make sure the Selected lists show the updated point values
+        refreshAbilityEquipmentDisplays();
+      }
+
+      // Update the displayed "X pts" labels in the Selected columns
+      function refreshAbilityEquipmentDisplays () {
+        // Fighter Abilities
+        var abilList = document.getElementById("section-abilities-selected");
+        if (abilList) {
+          var rows = abilList.getElementsByClassName("item-row");
+          for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            var idxAttr = row.getAttribute("data-idx");
+            var idx = idxAttr ? parseInt(idxAttr, 10) : i;
+            var ab = fighter.abilities[idx];
+            if (!ab) continue;
+            var ptsEl = row.querySelector(".item-points");
+            if (ptsEl) {
+              ptsEl.textContent = (ab.points || 0) + " pts";
+            }
+          }
+        }
+
+        // Equipment
+        var eqList = document.getElementById("section-equipment-selected");
+        if (eqList) {
+          var eqRows = eqList.getElementsByClassName("item-row");
+          for (var j = 0; j < eqRows.length; j++) {
+            var row2 = eqRows[j];
+            var idxAttr2 = row2.getAttribute("data-idx");
+            var idx2 = idxAttr2 ? parseInt(idxAttr2, 10) : j;
+            var eq = fighter.equipment[idx2];
+            if (!eq) continue;
+            var ptsEl2 = row2.querySelector(".item-points");
+            if (ptsEl2) {
+              ptsEl2.textContent = (eq.points || 0) + " pts";
+            }
+          }
+        }
+      }
+
+
+
+      // GENERIC PANEL FOR ABILITIES, LEADER, SPELLS, EQUIPMENT
+      function initSimplePanel (sectionId, title, srcArray, targetArrayName, isSpell, maxSelect) {
+        var container = document.getElementById(sectionId);
+        if (!container) return;
+
+        if (!fighter[targetArrayName]) {
+          fighter[targetArrayName] = [];
+        }
+
+        var html = '<div class="card"><h2>' + title + '</h2>';
+        if (isSpell) {
+          html += "<p style='font-size:0.8rem; color:#9ca3af; margin-top:0; margin-bottom:0.5rem;'>Warlocks may choose 2 spells and use 1 per activation, Master Warlocks may choose 3 spells and use 2 per activation.</p>";
+        }
+        if (maxSelect && targetArrayName === "leaderAbilities") {
+          html += "<p style='font-size:0.8rem; color:#9ca3af; margin-top:0; margin-bottom:0.5rem;'>You may select up to " + maxSelect + " Leader Abilities.</p>";
+        }
+
+        html += '<div class="flex-columns weapons-layout"><div class="column options-column">';
+        html += '<h3>Options</h3><div class="item-list weapons-options-grid">';
+
+        var i, it;
+        for (i = 0; i < srcArray.length; i++) {
+          it = srcArray[i];
+          var rightLabel;
+          if (isSpell) {
+            rightLabel = "CV " + it.cv;
+          } else {
+            rightLabel = (it.points || 0) + " pts";
+          }
+
+          html += ''
+            + '<div class="item-row" data-id="' + it.id + '">'
+            + '  <div class="item-row-header">'
+            + '    <div class="item-main">'
+            + '      <div class="item-name">' + it.name + '</div>'
+            + '      <div class="item-detail">' + (it.profile || it.effect || "") + '</div>'
+            + '    </div>'
+            + '    <div class="item-points">' + rightLabel + '</div>'
+            + '  </div>'
+            + '  <div class="item-footer">'
+            + '    <div></div>'
+            + '    <div class="item-actions"><button class="add-btn">Add</button></div>'
+            + '  </div>'
+            + '</div>';
+        }
+
+        html += '</div></div>';
+        html += '<div class="column selected-column">';
+        html += '<h3>Selected</h3><div class="item-list" id="' + sectionId + '-selected"></div>';
+        html += '</div></div>';
+        html += '</div>';
+        container.innerHTML = html;
+
+        function renderSelected () {
+          var listEl = document.getElementById(sectionId + "-selected");
+          var arr = fighter[targetArrayName];
+          var i;
+          if (!arr || !arr.length) {
+            listEl.innerHTML = "<p style='font-size:0.9rem; color:#9ca3af;'>None</p>";
+            return;
+          }
+          var sHtml = "";
+          for (i = 0; i < arr.length; i++) {
+            var a = arr[i];
+            var rightLabel;
+            if (isSpell) {
+              rightLabel = "CV " + (a.cv != null ? a.cv : "?");
+            } else {
+              rightLabel = (a.points || 0) + " pts";
+            }
+
+            sHtml += ''
+              + '<div class="item-row" data-idx="' + i + '">'
+              + '  <div class="item-row-header">'
+              + '    <div class="item-main">'
+              + '      <div class="item-name">' + a.name + '</div>'
+              + '      <div class="item-detail">' + (a.profile || a.effect || "") + '</div>'
+              + '    </div>'
+              + '    <div class="item-points">' + rightLabel + '</div>'
+              + '  </div>'
+              + '  <div class="item-footer">'
+              + '    <div></div>'
+              + '    <div class="item-actions"><button class="remove-btn">Remove</button></div>'
+              + '  </div>'
+              + '</div>';
+          }
+          listEl.innerHTML = sHtml;
+
+          var removes = listEl.getElementsByClassName("remove-btn");
+          for (i = 0; i < removes.length; i++) {
+            (function (btn) {
+              btn.addEventListener("click", function () {
+                var row = btn.closest(".item-row");
+                var idx = parseInt(row.getAttribute("data-idx"), 10);
+                fighter[targetArrayName].splice(idx, 1);
+                recalcAbilityPoints();
+                refreshTotal();
+                updateSummary();
+                renderSelected();
+              });
+            })(removes[i]);
+          }
+        }
+
+        var adds = container.getElementsByClassName("add-btn");
+        for (var j = 0; j < adds.length; j++) {
+          (function (btn) {
+            btn.addEventListener("click", function () {
+              var row = btn.closest(".item-row");
+              var id = row.getAttribute("data-id");
+              var src = srcArray;
+              var found = null;
+              var k;
+              for (k = 0; k < src.length; k++) {
+                if (src[k].id === id) {
+                  found = src[k];
+                  break;
+                }
+              }
+              if (!found) return;
+
+              if (isSpell && !fighter.isWarlock && !fighter.isMasterWarlock) {
+                alert("You must be a Psyker or Master Psyker to add spells.");
+                return;
+              }
+
+              if (maxSelect && fighter[targetArrayName].length >= maxSelect) {
+                alert("You may only select up to " + maxSelect + " " + title + ".");
+                return;
+              }
+
+              fighter[targetArrayName].push({
+                name: found.name,
+                points: (isSpell ? 0 : (found.points || 0)),
+                profile: found.profile,
+                effect: found.effect,
+                dynamicType: found.dynamicType,
+                dynamicFactor: found.dynamicFactor,
+                cv: found.cv
+              });
+              recalcAbilityPoints();
+              refreshTotal();
+              updateSummary();
+              renderSelected();
+            });
+          })(adds[j]);
+        }
+
+        recalcAbilityPoints();
+        renderSelected();
+        refreshTotal();
+        updateSummary();
+      }
+
+      // CC WEAPONS PANEL
+      function initWeaponsCC () {
+        var container = document.getElementById("section-weapons-cc");
+        if (!container) return;
+
+        var html = '<div class="card"><h2>Close Combat Weapons</h2>';
+        html += '<div class="flex-columns weapons-layout">';
+
+        html += '<div class="column options-column"><h3>Options</h3><div class="item-list weapons-options-grid">';
+        var i, w;
+        for (i = 0; i < CC_WEAPONS.length; i++) {
+          w = CC_WEAPONS[i];
+          html += ''
+            + '<div class="item-row" data-group="cc" data-id="' + w.id + '">'
+            + '  <div class="item-row-header">'
+            + '    <div class="item-main">'
+            + '      <div class="item-name">' + w.name + '</div>'
+            + '      <div class="item-detail">' + w.profile + '</div>'
+            + '    </div>'
+            + '    <div class="item-points">' + w.points + ' pts</div>'
+            + '  </div>'
+            + '  <div class="item-footer">'
+            + '    <div></div>'
+            + '    <div class="item-actions"><button class="add-weapon">Add</button></div>'
+            + '  </div>'
+            + '</div>';
+        }
+        html += '</div></div>';
+
+        html += '<div class="column selected-column"><h3>Selected CC Weapons</h3><div id="ccSelected" class="item-list"></div></div>';
+
+        html += '</div></div>';
+        container.innerHTML = html;
+
+        function renderSelected () {
+          var ccEl = document.getElementById("ccSelected");
+          var i;
+
+          if (!fighter.ccWeapons.length) {
+            ccEl.innerHTML = '<p style="font-size:0.9rem; color:#9ca3af;">None</p>';
+          } else {
+            var ccHtml = "";
+            for (i = 0; i < fighter.ccWeapons.length; i++) {
+              var wc = fighter.ccWeapons[i];
+              var prof = buildWeaponProfile(wc);
+              ccHtml += ''
+                + '<div class="item-row" data-idx="' + i + '" data-group="cc">'
+                + '  <div class="item-row-header">'
+                + '    <div class="item-main">'
+                + '      <div class="item-name">' + wc.name + '</div>'
+                + '      <div class="item-detail">' + prof + '</div>'
+                + '    </div>'
+                + '    <div class="item-points">' + wc.points + ' pts</div>'
+                + '  </div>'
+                + '  <div class="weapon-upgrades">'
+                + '    <label><input type="checkbox" class="upgrade-toggle" data-upg="poison"' + (wc.upgrades && wc.upgrades.poison ? ' checked' : '') + '>Poisoned/Fiery</label>'
+                + '    <label><input type="checkbox" class="upgrade-toggle" data-upg="enchanted"' + (wc.upgrades && wc.upgrades.enchanted ? ' checked' : '') + '>Enchanted</label>'
+                + '    <label><input type="checkbox" class="upgrade-toggle" data-upg="cursed"' + (wc.upgrades && wc.upgrades.cursed ? ' checked' : '') + '>Cursed</label>'
+                  + '    <label><input type="checkbox" class="upgrade-toggle" data-upg="truestrike"' + (wc.upgrades && wc.upgrades.truestrike ? ' checked' : '') + '>Truestrike</label>'
+                + '    <label><input type="checkbox" class="upgrade-toggle" data-upg="masterCrafted"' + (wc.upgrades && wc.upgrades.masterCrafted ? ' checked' : '') + '>Master Crafted</label>'
+                + '  </div>'
+                + '  <div class="item-footer">'
+                + '    <div></div>'
+                + '    <div class="item-actions"><button class="remove-btn" data-type="cc">Remove</button></div>'
+                + '  </div>'
+                + '</div>';
+            }
+            ccEl.innerHTML = ccHtml;
+          }
+
+          var removes = container.getElementsByClassName("remove-btn");
+          for (i = 0; i < removes.length; i++) {
+            (function (btn) {
+              btn.addEventListener("click", function () {
+                var row = btn.closest(".item-row");
+                var idx = parseInt(row.getAttribute("data-idx"), 10);
+                fighter.ccWeapons.splice(idx, 1);
+                recalcWeaponPoints();
+                refreshTotal();
+                updateSummary();
+                renderSelected();
+              });
+            })(removes[i]);
+          }
+
+          var upgToggles = container.getElementsByClassName("upgrade-toggle");
+          for (i = 0; i < upgToggles.length; i++) {
+            (function (input) {
+              input.addEventListener("change", function () {
+                var row = input.closest(".item-row");
+                var idx = parseInt(row.getAttribute("data-idx"), 10);
+                var upgKey = input.getAttribute("data-upg");
+
+                var arr = fighter.ccWeapons;
+                var wObj = arr[idx];
+                if (!wObj.upgrades) {
+                  wObj.upgrades = { poison: false, enchanted: false, cursed: false, truestrike: false, masterCrafted: false };
+                }
+                wObj.upgrades[upgKey] = input.checked;
+
+                recalcWeaponPoints();
+                renderSelected();
+                refreshTotal();
+                updateSummary();
+              });
+            })(upgToggles[i]);
+          }
+        }
+
+        var adds = container.getElementsByClassName("add-weapon");
+        for (var k = 0; k < adds.length; k++) {
+          (function (btn) {
+            btn.addEventListener("click", function () {
+              var row = btn.closest(".item-row");
+              var id = row.getAttribute("data-id");
+              var srcArray = CC_WEAPONS;
+              var i, found = null;
+              for (i = 0; i < srcArray.length; i++) {
+                if (srcArray[i].id === id) {
+                  found = srcArray[i];
+                  break;
+                }
+              }
+              if (!found) return;
+
+              fighter.ccWeapons.push({
+                name: found.name,
+                baseProfile: found.profile,
+                profile: found.profile,
+                basePoints: found.points,
+                points: found.points,
+                upgrades: {
+                  poison: false,
+                  enchanted: false,
+                  cursed: false,
+                  truestrike: false,  
+                  masterCrafted: false
+                }
+              });
+              recalcWeaponPoints();
+              refreshTotal();
+              updateSummary();
+              renderSelected();
+            });
+          })(adds[k]);
+        }
+
+        recalcWeaponPoints();
+        renderSelected();
+        refreshTotal();
+        updateSummary();
+      }
+
+      // RANGED WEAPONS PANEL
+      function initWeaponsRanged () {
+        var container = document.getElementById("section-weapons-ranged");
+        if (!container) return;
+
+        var html = '<div class="card"><h2>Ranged Weapons</h2>';
+        html += '<div class="flex-columns weapons-layout">';
+
+        html += '<div class="column options-column"><h3>Options</h3>';
+        html += '<div class="subtabs-row ranged-subtabs">';
+        html += '  <button class="subtab-pill ranged-cat-pill" data-cat="pistols">Pistols/Grenades</button>';
+        html += '  <button class="subtab-pill ranged-cat-pill" data-cat="light">Light/Medium Ranged</button>';
+        html += '  <button class="subtab-pill ranged-cat-pill" data-cat="special">Special</button>';
+        html += '  <button class="subtab-pill ranged-cat-pill" data-cat="heavy">Heavy</button>';
+        html += '</div>';
+        html += '<div id="rangedOptions" class="item-list weapons-options-grid"></div></div>';
+
+        html += '<div class="column selected-column"><h3>Selected Ranged Weapons</h3><div id="rangedSelected" class="item-list"></div></div>';
+
+        html += '</div></div>';
+        container.innerHTML = html;
+        // --- Ranged sub-category rendering ---
+        function setActiveRangedCategoryPills () {
+          var btns = container.getElementsByClassName("ranged-cat-pill");
+          for (var b = 0; b < btns.length; b++) {
+            var btn = btns[b];
+            var isActive = (btn.getAttribute("data-cat") === currentRangedCategory);
+            if (isActive) btn.classList.add("active");
+            else btn.classList.remove("active");
+          }
+        }
+
+        function renderRangedOptions () {
+          var listEl = document.getElementById("rangedOptions");
+          if (!listEl) return;
+
+          var src = getRangedWeaponsForCategory(currentRangedCategory);
+          var oHtml = "";
+          for (var i = 0; i < src.length; i++) {
+            var r = src[i];
+            oHtml += ''
+              + '<div class="item-row" data-group="ranged" data-id="' + r.id + '">'
+              + '  <div class="item-row-header">'
+              + '    <div class="item-main">'
+              + '      <div class="item-name">' + r.name + '</div>'
+              + '      <div class="item-detail">' + r.profile + '</div>'
+              + '    </div>'
+              + '    <div class="item-points">' + r.points + ' pts</div>'
+              + '  </div>'
+              + '  <div class="item-footer">'
+              + '    <div></div>'
+              + '    <div class="item-actions"><button class="add-weapon">Add</button></div>'
+              + '  </div>'
+              + '</div>';
+          }
+          listEl.innerHTML = oHtml || '<p style="font-size:0.9rem; color:#9ca3af;">None</p>';
+        }
+
+        // Initial state
+        if (!currentRangedCategory) currentRangedCategory = "pistols";
+        setActiveRangedCategoryPills();
+        renderRangedOptions();
+
+
+
+        function renderSelected () {
+          var rEl = document.getElementById("rangedSelected");
+          var i;
+
+          if (!fighter.rangedWeapons.length) {
+            rEl.innerHTML = '<p style="font-size:0.9rem; color:#9ca3af;">None</p>';
+          } else {
+            var rHtml = "";
+            for (i = 0; i < fighter.rangedWeapons.length; i++) {
+              var rw = fighter.rangedWeapons[i];
+              var profR = buildWeaponProfile(rw);
+              rHtml += ''
+                + '<div class="item-row" data-idx="' + i + '" data-group="ranged">'
+                + '  <div class="item-row-header">'
+                + '    <div class="item-main">'
+                + '      <div class="item-name">' + rw.name + '</div>'
+                + '      <div class="item-detail">' + profR + '</div>'
+                + '    </div>'
+                + '    <div class="item-points">' + rw.points + ' pts</div>'
+                + '  </div>'
+                + '  <div class="weapon-upgrades">'
+                + '    <label><input type="checkbox" class="upgrade-toggle" data-upg="poison"' + (rw.upgrades && rw.upgrades.poison ? ' checked' : '') + '>Poisoned/Fiery</label>'
+                + '    <label><input type="checkbox" class="upgrade-toggle" data-upg="enchanted"' + (rw.upgrades && rw.upgrades.enchanted ? ' checked' : '') + '>Enchanted</label>'
+                + '    <label><input type="checkbox" class="upgrade-toggle" data-upg="cursed"' + (rw.upgrades && rw.upgrades.cursed ? ' checked' : '') + '>Cursed</label>'
+                   + '    <label><input type="checkbox" class="upgrade-toggle" data-upg="truestrike"' + (rw.upgrades && rw.upgrades.truestrike ? ' checked' : '') + '>Truestrike</label>'
+                + '    <label><input type="checkbox" class="upgrade-toggle" data-upg="masterCrafted"' + (rw.upgrades && rw.upgrades.masterCrafted ? ' checked' : '') + '>Master Crafted</label>'
+                + '  </div>'
+                + '  <div class="item-footer">'
+                + '    <div></div>'
+                + '    <div class="item-actions"><button class="remove-btn" data-type="ranged">Remove</button></div>'
+                + '  </div>'
+                + '</div>';
+            }
+            rEl.innerHTML = rHtml;
+          }
+
+          var removes = container.getElementsByClassName("remove-btn");
+          for (i = 0; i < removes.length; i++) {
+            (function (btn) {
+              btn.addEventListener("click", function () {
+                var row = btn.closest(".item-row");
+                var idx = parseInt(row.getAttribute("data-idx"), 10);
+                fighter.rangedWeapons.splice(idx, 1);
+                recalcWeaponPoints();
+                refreshTotal();
+                updateSummary();
+                renderSelected();
+              });
+            })(removes[i]);
+          }
+
+          var upgToggles = container.getElementsByClassName("upgrade-toggle");
+          for (i = 0; i < upgToggles.length; i++) {
+            (function (input) {
+              input.addEventListener("change", function () {
+                var row = input.closest(".item-row");
+                var idx = parseInt(row.getAttribute("data-idx"), 10);
+                var upgKey = input.getAttribute("data-upg");
+
+                var arr = fighter.rangedWeapons;
+                var wObj = arr[idx];
+                if (!wObj.upgrades) {
+                  wObj.upgrades = { poison: false, enchanted: false, cursed: false, truestrike: false, masterCrafted: false };
+                }
+                wObj.upgrades[upgKey] = input.checked;
+
+                recalcWeaponPoints();
+                renderSelected();
+                refreshTotal();
+                updateSummary();
+              });
+            })(upgToggles[i]);
+          }
+        }
+
+        // Handle ranged sub-category tabs + adding weapons via event delegation
+        container.addEventListener("click", function (e) {
+          var t = e.target;
+
+          // Switch sub-category
+          if (t && t.classList && t.classList.contains("ranged-cat-pill")) {
+            var cat = t.getAttribute("data-cat") || "pistols";
+            currentRangedCategory = cat;
+            renderRangedOptions();
+            setActiveRangedCategoryPills();
+            return;
+          }
+
+          // Add weapon
+          if (t && t.classList && t.classList.contains("add-weapon")) {
+            var row = t.closest(".item-row");
+            if (!row) return;
+            var id = row.getAttribute("data-id");
+
+            var i, found = null;
+            for (i = 0; i < RANGED_WEAPONS.length; i++) {
+              if (RANGED_WEAPONS[i].id === id) { found = RANGED_WEAPONS[i]; break; }
+            }
+            if (!found) return;
+
+            fighter.rangedWeapons.push({
+              name: found.name,
+              baseProfile: found.profile,
+              profile: found.profile,
+              basePoints: found.points,
+              points: found.points,
+              upgrades: {
+                poison: false,
+                enchanted: false,
+                cursed: false,
+                truestrike: false,
+                masterCrafted: false
+              }
+            });
+
+            recalcWeaponPoints();
+            refreshTotal();
+            updateSummary();
+            renderSelected();
+          }
+        });
+
+        recalcWeaponPoints();
+        renderSelected();
+        refreshTotal();
+        updateSummary();
+      }
+
+      // TABS
+      function initTabs () {
+        var tabsContainer = document.getElementById("section-tabs");
+        if (!tabsContainer) return;
+
+        var tabs = tabsContainer.getElementsByClassName("tab-pill");
+        var sectionIds = [
+          "section-weapons-cc",
+          "section-weapons-ranged",
+          "section-abilities",
+          "section-leader",
+          "section-spells",
+          "section-equipment",
+          "section-summary"
+        ];
+
+        function setActiveTab (targetId) {
+          var i;
+          for (i = 0; i < tabs.length; i++) {
+            var tab = tabs[i];
+            var tTarget = tab.getAttribute("data-target");
+            if (tTarget === targetId) {
+              tab.classList.add("active");
+            } else {
+              tab.classList.remove("active");
+            }
+          }
+          for (i = 0; i < sectionIds.length; i++) {
+            var secId = sectionIds[i];
+            var el = document.getElementById(secId);
+            if (!el) continue;
+            el.style.display = (secId === targetId) ? "block" : "none";
+          }
+        }
+
+        for (var j = 0; j < tabs.length; j++) {
+          (function (tab) {
+            tab.addEventListener("click", function () {
+              var target = tab.getAttribute("data-target");
+              setActiveTab(target);
+            });
+          })(tabs[j]);
+        }
+
+        setActiveTab("section-weapons-cc");
+      }
+
+      // INIT
+      document.addEventListener("DOMContentLoaded", function () {
+        initStats();
+        initWeaponsCC();
+        initWeaponsRanged();
+        initSimplePanel("section-abilities", "Fighter Abilities", FIGHTER_ABILITIES, "abilities", false, null);
+        initSimplePanel("section-leader",   "Leader Abilities",  LEADER_ABILITIES,  "leaderAbilities", false, 2);
+        initSimplePanel("section-spells",   "Psychic Powers",            SPELLS,            "spells", true, null);
+        initSimplePanel("section-equipment","Equipment",         EQUIPMENT,         "equipment", false, null);
+        refreshTotal();
+        updateSummary();
+        initTabs();
+      });
+    })();
+  </script>
+</body>
+</html>
