@@ -1541,7 +1541,20 @@ html += "</div>";
           var total = computeTotal();
           var psyLabel = fighter.isMasterWarlock ? "Master Psyker" : (fighter.isWarlock ? "Psyker" : "None");
 
-          function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+          
+
+          // HP pips (◯) for print card (rows of 15)
+          var hpVal = Number(fighter.stats && fighter.stats.hp ? fighter.stats.hp : 0) || 0;
+          var maxPips = 30; // hard safety cap
+          var pipCount = Math.max(0, Math.min(hpVal, maxPips));
+          var pipsPerRow = 15;
+          var rows = [];
+          for (var pi = 0; pi < pipCount; pi += pipsPerRow) {
+            rows.push("◯".repeat(Math.min(pipsPerRow, pipCount - pi)));
+          }
+          var hpPips = rows.join("<br>");
+          if (hpVal > maxPips) hpPips += "<br>+" + (hpVal - maxPips);
+function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
           function listHtml(title, arr) {
             var out = `<div class="block"><div class="block-title">${esc(title)}</div>`;
@@ -1549,24 +1562,15 @@ html += "</div>";
             out += `<ul>`;
             for (var i=0;i<arr.length;i++){
               var x=arr[i];
+              var main = x.profile || x.effect || "";
               var pts = x.points || 0;
-
-              // Turn stored <br> tags (and any newlines) into real HTML line breaks on the printed card
-              var mainRaw = (x.profile || x.effect || "");
-              mainRaw = String(mainRaw)
-                .replace(/<br\b[^>]*>/gi, "\n")
-                .replace(/<br</gi, "\n")
-                .replace(/\r\n/g, "\n");
-
-              var rulesHtml = esc(mainRaw).replace(/\n+/g, "<br>");
-
-              out += `<li><b>${esc(x.name)}</b> <span class="muted">(${pts} pts)</span>`;
-              if (mainRaw) out += `<br><span class="muted">${rulesHtml}</span>`;
-              out += `</li>`;
+              out += `<li><b>${esc(x.name)}</b> <span class="muted">(${pts} pts)</span>` + (main ? `<br><span class="muted">${esc(main)}</span>` : ``) + `</li>`;
             }
             out += `</ul></div>`;
             return out;
-          }var stats = [];
+          }
+
+          var stats = [];
           for (var i=0;i<STAT_CONFIG.length;i++){
             var sc=STAT_CONFIG[i];
             stats.push(`<span class="stat"><span class="k">${esc(sc.label)}</span> <span class="v">${esc(fighter.stats[sc.key] + (sc.unit||""))}</span></span>`);
@@ -1578,7 +1582,11 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .card{border:2px solid #111;border-radius:14px;padding:16px;max-width:900px;}
 .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
 .name{font-size:26px;font-weight:800;}
-.pts{font-size:18px;font-weight:800;padding:6px 10px;border:2px solid #111;border-radius:12px;white-space:nowrap;}
+.pts{font-size:18px;font-weight:800;padding:6px 10px;border:2px solid #111;border-radius:12px;white-space:nowrap;display:inline-block;}
+.right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+.hp-row{font-size:12px;color:#333;display:flex;gap:6px;align-items:flex-start;max-width:380px;}
+.hp-label{font-weight:900;}
+.hp-pips{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;letter-spacing:2px;line-height:1.2;font-size:1.75em;}
 .meta{margin-top:6px;font-size:13px;color:#333;}
 .stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
 .stat{border:1px solid #111;border-radius:10px;padding:6px 8px;min-width:84px;text-align:center;}
@@ -1598,7 +1606,10 @@ li{margin-bottom:6px;}
       <div class="name">${esc(nm)}</div>
       <div class="meta">Psyker: <b>${esc(psyLabel)}</b></div>
     </div>
-    <div class="pts">${total} pts</div>
+    <div class="right">
+      <div class="pts">${total} pts</div>
+      <div class="hp-row"><span class="hp-label">HP:</span> <span class="hp-pips">${hpPips}</span></div>
+    </div>
   </div>
   <div class="stats">${stats.join("")}</div>
   <div class="grid">
