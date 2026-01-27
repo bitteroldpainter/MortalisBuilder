@@ -1422,9 +1422,9 @@
 
         html += "<div style='display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.6rem;'>";        html += "<button class='tab-pill-colour' onclick='copyFighterText()'>Copy Text</button>";
         
-        html += "<button class=\'tab-pill-colour\' onclick=\'printFighterCard\(\)\'>Print Card</button>";
+        html += "<button class=\'tab-pill-colour\' onclick=\'printFighterCard\(\)\'>Generate Card</button>";
 html += "</div>";
-        html += "<p style='margin:0.45rem 0 0; font-size:0.82rem; color:#9ca3af;'>Tip: Use <b>Copy Text</b> to paste into a document or <b>Print Card</b> to generate a simple Fighter Card.</p>";
+        html += "<p style='margin:0.45rem 0 0; font-size:0.82rem; color:#9ca3af;'>Tip: Use <b>Copy Text</b> to paste into a document or <b>Generate Card</b> to generate a simple Fighter Card.</p>";
         html += "</div>";
 
         function renderList(title, arr) {
@@ -1535,25 +1535,24 @@ html += "</div>";
       // Exposed to onclick handlers
       
       // ===== Print-friendly Card =====
-      window.printFighterCard = function () {
+      
+      // ===== Generate Card (in-page) =====
+      window.generateFighterCard = function () {
         try {
           var nm = (fighter.name && fighter.name.trim()) ? fighter.name.trim() : "Fighter";
           var total = computeTotal();
           var psyLabel = fighter.isMasterWarlock ? "Master Psyker" : (fighter.isWarlock ? "Psyker" : "None");
 
-          
-
-          
-
-          // Resolve asset URLs for the print window (relative URLs won't resolve from about:blank)
+          // Resolve asset URLs (works locally + GitHub Pages)
           var baseHref = (window.location && window.location.href) ? window.location.href : "";
-          baseHref = baseHref.replace(/[#?].*$/, "");              // strip query/hash
-          baseHref = baseHref.replace(/[^\/]*$/, "");              // keep directory
+          baseHref = baseHref.replace(/[#?].*$/, "");
+          baseHref = baseHref.replace(/[^\/]*$/, "");
           var logoUrl = (new URL("./img/mortalislogo.png", baseHref)).href;
           var texUrl  = (new URL("./img/mortalistexture.jpg", baseHref)).href;
-// HP pips (◯) for print card (rows of 15)
+
+          // HP pips (rows of 15)
           var hpVal = Number(fighter.stats && fighter.stats.hp ? fighter.stats.hp : 0) || 0;
-          var maxPips = 30; // hard safety cap
+          var maxPips = 30;
           var pipCount = Math.max(0, Math.min(hpVal, maxPips));
           var pipsPerRow = 15;
           var rows = [];
@@ -1562,90 +1561,262 @@ html += "</div>";
           }
           var hpPips = rows.join("<br>");
           if (hpVal > maxPips) hpPips += "<br>+" + (hpVal - maxPips);
-function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+          function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+          function renderRulesHtml (s) {
+            var t = String(s || "")
+              .replace(/<br\b[^>]*>/gi, "\n")
+              .replace(/<br</gi, "\n")
+              .replace(/\r\n/g, "\n");
+            var parts = t.split(/\n+/);
+            var out = "";
+            for (var i = 0; i < parts.length; i++) {
+              var line = parts[i].trim();
+              if (!line) continue;
+              out += (out ? "<br>" : "") + esc(line);
+            }
+            return out;
+          }
+          // Only include blocks that have content, so the grid compacts nicely
+          var blocks = [];
+          var b;
+          b = listHtml("Close Combat Weapons", fighter.ccWeapons); if (b) blocks.push(b);
+          b = listHtml("Ranged Weapons", fighter.rangedWeapons); if (b) blocks.push(b);
+          b = listHtml("Abilities", fighter.abilities); if (b) blocks.push(b);
+          b = listHtml("Leader Abilities", fighter.leaderAbilities); if (b) blocks.push(b);
+          b = listHtml("Psychic Powers", fighter.spells); if (b) blocks.push(b);
+          b = listHtml("Equipment", fighter.equipment); if (b) blocks.push(b);
+          var gridHtml = "<div class='grid'>" + blocks.join("") + "</div>";
+
+
 
           function listHtml(title, arr) {
-            var out = `<div class="block"><div class="block-title">${esc(title)}</div>`;
-            if (!arr || !arr.length) return out + `<div class="muted">None</div></div>`;
-            out += `<ul>`;
-            for (var i=0;i<arr.length;i++){
-              var x=arr[i];
-              var main = x.profile || x.effect || "";
+            if (!arr || !arr.length) return "";
+            var out = "<div class='block'><div class='block-title'>" + esc(title) + "</div>";
+            out += "<ul>";
+            for (var i = 0; i < arr.length; i++) {
+              var x = arr[i];
               var pts = x.points || 0;
-              out += `<li><b>${esc(x.name)}</b> <span class="muted">(${pts} pts)</span>` + (main ? `<br><span class="muted">${esc(main)}</span>` : ``) + `</li>`;
+              var main = (x.profile || x.effect || "");
+              var rulesHtml = renderRulesHtml(main);
+              out += "<li><b>" + esc(x.name) + "</b> <span class='muted'>(" + pts + " pts)</span>";
+              if (rulesHtml) out += "<br><span class='muted'>" + rulesHtml + "</span>";
+              out += "</li>";
             }
-            out += `</ul></div>`;
+            out += "</ul></div>";
             return out;
           }
 
           var stats = [];
-          for (var i=0;i<STAT_CONFIG.length;i++){
-            var sc=STAT_CONFIG[i];
-            stats.push(`<span class="stat"><span class="k">${esc(sc.label)}</span> <span class="v">${esc(fighter.stats[sc.key] + (sc.unit||""))}</span></span>`);
+          for (var i = 0; i < STAT_CONFIG.length; i++) {
+            var sc = STAT_CONFIG[i];
+            stats.push("<span class='stat'><span class='k'>" + esc(sc.label) + "</span> <span class='v'>" + esc(fighter.stats[sc.key] + (sc.unit||"")) + "</span></span>");
           }
 
-          var doc = `<!doctype html><html><head><meta charset="utf-8"><title>${esc(nm)} — ${total} pts</title>
-<style>
-body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#fff;color:#111;}
-.card{width:820px;margin:0 auto;background:url("${texUrl}") repeat;background-size:600px auto;border:2px solid #111;border-radius:0;padding:16px 18px 18px;box-shadow:0 10px 30px rgba(0,0,0,.18);}
-}
-.logo-wrap{width:100%;display:flex;justify-content:center;align-items:center;margin-bottom:12px;}
-.logo-img{width:22%;max-width:260px;height:auto;opacity:0.98;display:block;}
-.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
-.name{font-size:20px;font-weight:900;letter-spacing:1px;}
-.left-pill{background:rgba(255,255,255,0.88);border:1px solid rgba(0,0,0,0.25);border-radius:14px;padding:10px 12px;box-shadow:0 2px 6px rgba(0,0,0,0.25);width:33%;box-sizing:border-box;flex:0 0 33%;}.pts{font-size:18px;font-weight:800;padding:6px 10px;border:2px solid #111;border-radius:12px;white-space:nowrap;display:inline-block;background:rgba(255,255,255,0.88);box-shadow:0 2px 6px rgba(0,0,0,0.25);}
-.right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
-.hp-row{font-size:12px;color:#333;display:flex;gap:6px;align-items:flex-start;max-width:380px;}
-.hp-label{font-weight:900;}
-.hp-pips{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;letter-spacing:3px;line-height:1.1;font-size:3.2em;color:#fff;text-shadow:-1px 0 #000, 1px 0 #000, 0 -1px #000, 0 1px #000, -1px -1px #000, 1px 1px #000, -1px 1px #000, 1px -1px #000;}
-.meta{margin-top:6px;font-size:13px;color:#333;}
-.stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
-.stat{background:rgba(255,255,255,0.88);border:1px solid rgba(0,0,0,0.25);border-radius:14px;padding:6px 8px;min-width:84px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,0.25);}
-.stat .k{display:block;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:#444;}
-.stat .v{display:block;font-size:16px;font-weight:800;margin-top:2px;}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
-.block{background:rgba(255,255,255,0.88);border-radius:14px;border:1px solid rgba(0,0,0,0.25);box-shadow:0 2px 6px rgba(0,0,0,0.25);padding:10px;margin-bottom:10px;}
-.block-title{font-weight:900;margin-bottom:6px;}
-ul{margin:0;padding-left:18px;}
-li{margin-bottom:6px;}
-.muted{color:#555;font-size:12px;}
-@media print{body{margin:0} .card{border:none;border-radius:0}}
-</style></head><body>
-<div class="card">
-  <div style="width:100%;display:block;text-align:center;margin:0 0 12px 0;"><img src="${logoUrl}" style="width:22%;max-width:260px;height:auto;display:inline-block;opacity:0.98;"></div>
+          // Create / reuse overlay
+          var existing = document.getElementById("generated-card-overlay");
+          if (!existing) {
+            existing = document.createElement("div");
+            existing.id = "generated-card-overlay";
+            existing.style.position = "fixed";
+            existing.style.inset = "0";
+            existing.style.zIndex = "99999";
+            existing.style.overflow = "auto";
+            existing.style.background = "#ffffff";
+            existing.style.padding = "24px";
+            document.body.appendChild(existing);
+          }
 
-<div class="top">
-    <div class="left-pill">
-    <div class="name">${esc(nm)}</div>
-    <div class="meta">Psyker: <b>${esc(psyLabel)}</b></div>
-  </div>
-    <div class="right">
-      <div class="pts">${total} pts</div>
-      <div class="hp-row"><span class="hp-label">HP:</span> <span class="hp-pips">${hpPips}</span></div>
-    </div>
-  </div>
-  <div class="stats">${stats.join("")}</div>
-  <div class="grid">
-    ${listHtml("Close Combat Weapons", fighter.ccWeapons)}
-    ${listHtml("Ranged Weapons", fighter.rangedWeapons)}
-    ${listHtml("Fighter Abilities", fighter.abilities)}
-    ${listHtml("Leader Abilities", fighter.leaderAbilities)}
-    ${listHtml("Psychic Powers", fighter.spells)}
-    ${listHtml("Equipment", fighter.equipment)}
-  </div>
-</div>
-<script>window.onload=function(){window.print();};<\/script>
-</body></html>`;
+          // Hide app UI while in card view (but keep it in DOM)
+          document.body.classList.add("card-view");
 
-          var w = window.open("", "_blank");
-          if (!w) { alert("Popup blocked — allow popups to print the card."); return; }
-          w.document.open();
-          w.document.write(doc);
-          w.document.close();
-        } catch (e) {
-          alert("Print failed: " + e);
+          existing.innerHTML =
+            "<div style='max-width:900px;margin:0 auto;'>" +
+              "<div style='display:flex;gap:10px;justify-content:flex-end;margin-bottom:10px;'>" +
+                "<button onclick='window.exitCardView()' style='padding:8px 10px;border-radius:10px;border:1px solid #222;background:#fff;font-weight:800;cursor:pointer;'>Back</button>" +
+                "<button onclick='window.print()' style='padding:8px 10px;border-radius:10px;border:1px solid #222;background:#fff;font-weight:800;cursor:pointer;'>Print</button>" +
+              "</div>" +
+              "<div class='print-card card'>" +
+                "<div style='width:100%;display:block;text-align:center;margin:0 0 12px 0;'>" +
+                  "<img src='" + logoUrl + "' style='width:22%;max-width:260px;height:auto;display:inline-block;opacity:0.98;'>" +
+                "</div>" +
+                "<div class='top'>" +
+                  "<div class='left-pill'><div class='name'>" + esc(nm) + "</div><div class='meta'>Psyker: <b>" + esc(psyLabel) + "</b></div></div>" +
+                  "<div class='right'>" +
+                    "<div class='pts'>" + total + " pts</div>" +
+                    "<div class='hp-row'><span class='hp-label'>HP:</span> <span class='hp-pips'>" + hpPips + "</span></div>" +
+                  "</div>" +
+                "</div>" +
+                "<div class='stats'>" + stats.join('') + "</div>" +
+                gridHtml +
+              "</div>" +
+            "</div>";
+
+          // Hide empty sections on the generated card (removes blocks that would show 'None')
+          try {
+            var overlay = document.getElementById("generated-card-overlay");
+            if (overlay) {
+              var blocks = overlay.querySelectorAll(".print-card .block");
+              blocks.forEach(function (blk) {
+                var ul = blk.querySelector("ul");
+                var muted = blk.querySelector(".muted");
+                if (!ul || (muted && /none/i.test((muted.textContent || "").trim()))) {
+                  blk.remove();
+                }
+              });
+            }
+          } catch (e) {}
+
+          // Fixed 8:7 card ratio with auto-scale-to-fit (no scrolling)
+          try {
+            var overlay = document.getElementById("generated-card-overlay");
+            if (overlay) {
+              var card = overlay.querySelector(".print-card.card");
+              if (card) {
+                // Wrap all card content in a scalable inner container (once)
+                var inner = card.querySelector(".card-inner");
+                if (!inner) {
+                  inner = document.createElement("div");
+                  inner.className = "card-inner";
+                  while (card.firstChild) inner.appendChild(card.firstChild);
+                  card.appendChild(inner);
+                }
+
+                // Measure with no scaling first
+                inner.style.transform = "scale(1)";
+                inner.style.transformOrigin = "top left";
+                inner.style.width = "100%";
+
+                var availH = card.clientHeight;
+                var naturalH = inner.scrollHeight || 0;
+                if (naturalH > 0 && availH > 0) {
+                  var scale = Math.min(1, availH / naturalH);
+                  inner.style.transform = "scale(" + scale.toFixed(4) + ")";
+                  inner.style.width = (100 / scale).toFixed(2) + "%";
+                }
+              }
+            }
+          } catch (e) {}
+
+          // Inject/refresh print-card styles (scoped)
+          var styleId = "generated-card-style";
+          var st = document.getElementById(styleId);
+          if (!st) {
+            st = document.createElement("style");
+            st.id = styleId;
+            document.head.appendChild(st);
+          }
+          st.textContent = `
+            /* Hide the app behind the overlay while generating the card */
+            body.card-view > :not(#generated-card-overlay):not(style):not(script) { display: none !important; }
+
+            /* Print: show only the card */
+            @media print {
+              body.card-view > :not(#generated-card-overlay):not(style):not(script) { display: none !important; }
+              #generated-card-overlay { position: static !important; inset: auto !important; background: transparent !important; padding: 0 !important; }
+              #generated-card-overlay button { display: none !important; }
+            }
+
+            .print-card.card{
+              width:820px;
+              margin:0 auto;
+              background:url('${texUrl}') repeat;
+              background-size:600px auto;
+              border:2px solid #111;
+              border-radius:0;
+              padding:16px 18px 18px;
+              box-shadow:0 10px 30px rgba(0,0,0,.18);
+            }
+            .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+            .name{font-size:20px;font-weight:900;letter-spacing:1px;}
+            .meta{margin-top:6px;font-size:13px;color:#333;}
+            .pts{font-size:18px;font-weight:800;padding:6px 10px;border:2px solid #111;border-radius:12px;white-space:nowrap;display:inline-block;background:rgba(255,255,255,0.88);box-shadow:0 2px 6px rgba(0,0,0,0.25);}
+            .right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+            .hp-row{font-size:12px;color:#333;display:flex;gap:6px;align-items:flex-start;max-width:380px;}
+            .hp-label{font-weight:900;}
+            .hp-pips{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;letter-spacing:3px;line-height:1.1;font-size:3.2em;color:#fff;
+              text-shadow:-1px 0 #000, 1px 0 #000, 0 -1px #000, 0 1px #000, -1px -1px #000, 1px 1px #000, -1px 1px #000, 1px -1px #000;}
+            .left-pill{background:rgba(255,255,255,0.88);border:1px solid rgba(0,0,0,0.25);border-radius:14px;padding:10px 12px;box-shadow:0 2px 6px rgba(0,0,0,0.25);width:33%;box-sizing:border-box;flex:0 0 33%;}
+            .stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+            .stat{background:rgba(255,255,255,0.88);border:1px solid rgba(0,0,0,0.25);border-radius:14px;padding:6px 8px;min-width:84px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,0.25);}
+            .stat .k{display:block;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:#444;}
+            .stat .v{display:block;font-size:16px;font-weight:800;margin-top:2px;}
+            .grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:12px;margin-top:14px;align-items:start;}
+            .block{background:rgba(255,255,255,0.88);border-radius:14px;border:1px solid rgba(0,0,0,0.25);box-shadow:0 2px 6px rgba(0,0,0,0.25);padding:10px;}
+            .block-title{font-weight:900;margin-bottom:6px;color:#111;}
+            ul{margin:0;padding-left:18px;}
+            li{margin-bottom:6px;}
+            .muted{color:#555;font-size:12px;}
+          
+            /* card text color fix */
+            .print-card.card, .print-card.card * { color:#111 !important; }
+            .print-card.card .muted { color:#555 !important; }
+            .print-card.card .hp-pips { color:#fff !important; }
+
+            .card-inner{width:100%;transform-origin:top left;}
+
+            @media print { body{-webkit-print-color-adjust:exact;print-color-adjust:exact;} }
+`;
+        
+          // ===== Fixed 8:7 ratio + autoscale-to-fit (no scrolling) =====
+          try {
+            // Enforce fixed frame (8:7) on the generated card
+            var overlay = document.getElementById("generated-card-overlay");
+            if (overlay) {
+              var card = overlay.querySelector(".print-card.card");
+              if (card) {
+                card.style.height = "718px";   // 820 * 7 / 8
+                card.style.overflow = "hidden";
+                card.style.boxSizing = "border-box";
+
+                // Wrap content in a scalable inner container
+                var inner = card.querySelector(".card-inner");
+                if (!inner) {
+                  inner = document.createElement("div");
+                  inner.className = "card-inner";
+                  while (card.firstChild) inner.appendChild(card.firstChild);
+                  card.appendChild(inner);
+                }
+                inner.style.transformOrigin = "top left";
+
+                function fit() {
+                  // reset scale to measure natural size
+                  inner.style.transform = "scale(1)";
+                  inner.style.width = "100%";
+
+                  var availH = card.clientHeight;
+                  var naturalH = inner.scrollHeight || 0;
+                  if (naturalH > 0 && availH > 0) {
+                    var scale = Math.min(1, availH / naturalH);
+                    inner.style.transform = "scale(" + scale.toFixed(4) + ")";
+                    inner.style.width = (100 / scale).toFixed(2) + "%";
+                  }
+                }
+
+                // run after layout settles
+                requestAnimationFrame(function(){ requestAnimationFrame(fit); });
+
+                // Also enable background/color printing where supported
+                st.textContent += "\n@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}\n";
+              }
+            }
+          } catch (e) {}
+} catch (e) {
+          alert("Generate Card failed: " + e);
         }
       };
+
+      window.exitCardView = function () {
+        var el = document.getElementById("generated-card-overlay");
+        if (el) el.remove();
+        document.body.classList.remove("card-view");
+      };
+
+
+      // Backward compatibility
+      window.printFighterCard = function () { window.generateFighterCard(); };
+
 
 
 window.copyFighterText = function () {
