@@ -1543,7 +1543,15 @@ html += "</div>";
 
           
 
-          // HP pips (◯) for print card (rows of 15)
+          
+
+          // Resolve asset URLs for the print window (relative URLs won't resolve from about:blank)
+          var baseHref = (window.location && window.location.href) ? window.location.href : "";
+          baseHref = baseHref.replace(/[#?].*$/, "");              // strip query/hash
+          baseHref = baseHref.replace(/[^\/]*$/, "");              // keep directory
+          var logoUrl = (new URL("./img/mortalislogo.png", baseHref)).href;
+          var texUrl  = (new URL("./img/mortalistexture.jpg", baseHref)).href;
+// HP pips (◯) for print card (rows of 15)
           var hpVal = Number(fighter.stats && fighter.stats.hp ? fighter.stats.hp : 0) || 0;
           var maxPips = 30; // hard safety cap
           var pipCount = Math.max(0, Math.min(hpVal, maxPips));
@@ -1579,7 +1587,8 @@ function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;")
           var doc = `<!doctype html><html><head><meta charset="utf-8"><title>${esc(nm)} — ${total} pts</title>
 <style>
 body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#fff;color:#111;}
-.card{width:820px;margin:0 auto;background:url("./img/mortalistexture.jpg") repeat;background-size:600px auto;border-radius:0;padding:16px 18px 18px;}}
+.card{width:820px;margin:0 auto;background:url("${texUrl}") repeat;background-size:600px auto;border:2px solid #111;border-radius:0;padding:16px 18px 18px;box-shadow:0 10px 30px rgba(0,0,0,.18);}
+}
 .logo-wrap{width:100%;display:flex;justify-content:center;align-items:center;margin-bottom:12px;}
 .logo-img{width:22%;max-width:260px;height:auto;opacity:0.98;display:block;}
 .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
@@ -1603,7 +1612,7 @@ li{margin-bottom:6px;}
 @media print{body{margin:0} .card{border:none;border-radius:0}}
 </style></head><body>
 <div class="card">
-  <div style="width:100%;display:block;text-align:center;margin:0 0 12px 0;"><img src="./img/mortalislogo.png" style="width:22%;max-width:260px;height:auto;display:inline-block;opacity:0.98;"></div>
+  <div style="width:100%;display:block;text-align:center;margin:0 0 12px 0;"><img src="${logoUrl}" style="width:22%;max-width:260px;height:auto;display:inline-block;opacity:0.98;"></div>
 
 <div class="top">
     <div class="left-pill">
