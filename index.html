@@ -1550,7 +1550,7 @@ html += "</div>";
           var pipsPerRow = 15;
           var rows = [];
           for (var pi = 0; pi < pipCount; pi += pipsPerRow) {
-            rows.push("◯".repeat(Math.min(pipsPerRow, pipCount - pi)));
+            rows.push("●".repeat(Math.min(pipsPerRow, pipCount - pi)));
           }
           var hpPips = rows.join("<br>");
           if (hpVal > maxPips) hpPips += "<br>+" + (hpVal - maxPips);
@@ -1578,22 +1578,24 @@ function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;")
 
           var doc = `<!doctype html><html><head><meta charset="utf-8"><title>${esc(nm)} — ${total} pts</title>
 <style>
-body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:20px;color:#111;background:#fff;}
-.card{border:2px solid #111;border-radius:14px;padding:16px;max-width:900px;}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#fff;color:#111;}
+.card{width:820px;margin:0 auto;background:url("./img/mortalistexture.jpg") repeat;background-size:600px auto;border-radius:0;padding:16px 18px 18px;}}
+.logo-wrap{width:100%;display:flex;justify-content:center;align-items:center;margin-bottom:12px;}
+.logo-img{width:22%;max-width:260px;height:auto;opacity:0.98;display:block;}
 .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
-.name{font-size:26px;font-weight:800;}
-.pts{font-size:18px;font-weight:800;padding:6px 10px;border:2px solid #111;border-radius:12px;white-space:nowrap;display:inline-block;}
+.name{font-size:20px;font-weight:900;letter-spacing:1px;}
+.left-pill{background:rgba(255,255,255,0.88);border:1px solid rgba(0,0,0,0.25);border-radius:14px;padding:10px 12px;box-shadow:0 2px 6px rgba(0,0,0,0.25);width:33%;box-sizing:border-box;flex:0 0 33%;}.pts{font-size:18px;font-weight:800;padding:6px 10px;border:2px solid #111;border-radius:12px;white-space:nowrap;display:inline-block;background:rgba(255,255,255,0.88);box-shadow:0 2px 6px rgba(0,0,0,0.25);}
 .right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
 .hp-row{font-size:12px;color:#333;display:flex;gap:6px;align-items:flex-start;max-width:380px;}
 .hp-label{font-weight:900;}
-.hp-pips{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;letter-spacing:2px;line-height:1.2;font-size:1.75em;}
+.hp-pips{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;letter-spacing:3px;line-height:1.1;font-size:3.2em;color:#fff;text-shadow:-1px 0 #000, 1px 0 #000, 0 -1px #000, 0 1px #000, -1px -1px #000, 1px 1px #000, -1px 1px #000, 1px -1px #000;}
 .meta{margin-top:6px;font-size:13px;color:#333;}
 .stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
-.stat{border:1px solid #111;border-radius:10px;padding:6px 8px;min-width:84px;text-align:center;}
+.stat{background:rgba(255,255,255,0.88);border:1px solid rgba(0,0,0,0.25);border-radius:14px;padding:6px 8px;min-width:84px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,0.25);}
 .stat .k{display:block;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:#444;}
 .stat .v{display:block;font-size:16px;font-weight:800;margin-top:2px;}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
-.block{border:1px solid #111;border-radius:12px;padding:10px;}
+.block{background:rgba(255,255,255,0.88);border-radius:14px;border:1px solid rgba(0,0,0,0.25);box-shadow:0 2px 6px rgba(0,0,0,0.25);padding:10px;margin-bottom:10px;}
 .block-title{font-weight:900;margin-bottom:6px;}
 ul{margin:0;padding-left:18px;}
 li{margin-bottom:6px;}
@@ -1601,11 +1603,13 @@ li{margin-bottom:6px;}
 @media print{body{margin:0} .card{border:none;border-radius:0}}
 </style></head><body>
 <div class="card">
-  <div class="top">
-    <div>
-      <div class="name">${esc(nm)}</div>
-      <div class="meta">Psyker: <b>${esc(psyLabel)}</b></div>
-    </div>
+  <div style="width:100%;display:block;text-align:center;margin:0 0 12px 0;"><img src="./img/mortalislogo.png" style="width:22%;max-width:260px;height:auto;display:inline-block;opacity:0.98;"></div>
+
+<div class="top">
+    <div class="left-pill">
+    <div class="name">${esc(nm)}</div>
+    <div class="meta">Psyker: <b>${esc(psyLabel)}</b></div>
+  </div>
     <div class="right">
       <div class="pts">${total} pts</div>
       <div class="hp-row"><span class="hp-label">HP:</span> <span class="hp-pips">${hpPips}</span></div>
