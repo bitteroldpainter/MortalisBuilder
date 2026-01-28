@@ -2806,7 +2806,7 @@ window.copyFighterText = function () {
     border: 2px solid #111;
     border-radius: 0;
     box-sizing: border-box;
-    padding: 10px 18px 18px;
+    padding: 6px 18px 18px;
     overflow: hidden; /* fixed frame */
     display:flex;
     flex-direction:column;
@@ -2815,8 +2815,11 @@ window.copyFighterText = function () {
     background-size: 600px auto;
   }
 
-  .cc-logo{width:22%; max-width:260px; height:auto; display:block; margin: 0 auto 4px auto; opacity:0.98;}
-  .cc-top{margin-top:-6px;display:flex; justify-content:space-between; gap:12px; align-items:flex-start;}
+  .cc-header{position:relative; padding-top:0;}
+.cc-logo{position:absolute; top:0; left:50%; transform:translateX(-50%); width:18%; max-width:220px; height:auto; opacity:0.98;}
+
+  .cc-top{display:flex; justify-content:space-between; gap:12px; align-items:flex-start; margin-top:54px;}
+
   .cc-leftpill{
     background: rgba(255,255,255,0.92);
     border: 1px solid rgba(0,0,0,0.25);
@@ -3073,7 +3076,8 @@ window.copyFighterText = function () {
 
       top.appendChild(left);
       top.appendChild(right);
-      card.appendChild(top);
+      header.appendChild(top);
+      card.appendChild(header);
 
       // stats pills
       var statsWrap = document.createElement("div");
