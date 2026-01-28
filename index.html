@@ -1357,6 +1357,10 @@
           equipment: 0
         }
       };
+      // Expose state for external card renderer
+      window.fighter = fighter;
+      window.computeTotal = computeTotal;
+
 
       // TOTALS
       function computeTotal () {
@@ -1470,15 +1474,15 @@ html += "</div>";
             fighter.name = this.value || "";
             if (__nameDebounce) clearTimeout(__nameDebounce);
             __nameDebounce = setTimeout(function () {
-              updateSummary();
+              // Name does not affect points/stats; avoid full rerender while typing.
+              // (Keeps typing snappy even with long lists.)
             }, 150);
-          });
+            });
           // Also update on blur (useful if paste happens)
           nameInput.addEventListener("blur", function () {
             fighter.name = this.value || "";
-            updateSummary();
           });
-        }
+          }
 }
 
             // ===== Copy Build Text =====
@@ -2763,5 +2767,443 @@ window.copyFighterText = function () {
       });
     })();
   </script>
+
+<!-- Clean card renderer override (DOM-based; avoids template-literal string editing pitfalls) -->
+<style id="mortalis-clean-card-css">
+  /* Overlay */
+  #generated-card-overlay{
+    position:fixed; inset:0; z-index:9999;
+    display:none;
+    background:#fff;
+    overflow:auto;
+    padding:24px;
+    box-sizing:border-box;
+    font-family: Arial, Helvetica, sans-serif;
+    color:#111;
+  }
+  #generated-card-toolbar{
+    max-width: 980px;
+    margin: 0 auto 12px auto;
+    display:flex;
+    gap:10px;
+    justify-content:flex-end;
+    align-items:center;
+  }
+  #generated-card-toolbar button{
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid #222;
+    background: #fff;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  /* Card frame */
+  .print-card.clean-card{
+    width: 820px;
+    height: 718px; /* 8:7 of 820 */
+    margin: 0 auto;
+    border: 2px solid #111;
+    border-radius: 0;
+    box-sizing: border-box;
+    padding: 16px 18px 18px;
+    overflow: hidden; /* fixed frame */
+    display:flex;
+    flex-direction:column;
+    box-shadow: 0 10px 30px rgba(0,0,0,.18);
+    background-repeat: repeat;
+    background-size: 600px auto;
+  }
+
+  .cc-logo{width:22%; max-width:260px; height:auto; display:block; margin: 0 auto 12px auto; opacity:0.98;}
+  .cc-top{display:flex; justify-content:space-between; gap:12px; align-items:flex-start;}
+  .cc-leftpill{
+    background: rgba(255,255,255,0.92);
+    border: 1px solid rgba(0,0,0,0.25);
+    border-radius: 14px;
+    padding: 10px 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    flex: 1 1 auto;
+    max-width: 33%;
+    box-sizing:border-box;
+  }
+  .cc-name{font-weight: 900; font-size: 20px; margin-bottom: 4px; color:#111;}
+  .cc-meta{font-size: 12px; color:#111;}
+  .cc-right{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    align-items:flex-end;
+    flex: 0 0 auto;
+  }
+  .cc-pts{
+    background: rgba(255,255,255,0.92);
+    border: 1px solid rgba(0,0,0,0.25);
+    border-radius: 14px;
+    padding: 8px 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    font-weight: 900;
+    color:#111;
+    min-width: 110px;
+    text-align:center;
+  }
+  .cc-hp{
+    background: rgba(255,255,255,0.92);
+    border: 1px solid rgba(0,0,0,0.25);
+    border-radius: 14px;
+    padding: 8px 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    color:#111;
+    min-width: 110px;
+  }
+  .hp-pips{
+    display:inline-block;
+    vertical-align:middle;
+    margin-left:6px;
+    line-height: 1.05;
+  }
+  .hp-pip{
+    display:inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid #111;
+    background: #fff;
+    margin: 0 3px 3px 0;
+    box-sizing:border-box;
+  }
+
+  .cc-stats{
+    margin-top: 12px;
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    gap:8px;
+  }
+  .cc-stat{
+    background: rgba(255,255,255,0.88);
+    border: 1px solid rgba(0,0,0,0.25);
+    border-radius: 14px;
+    padding: 8px 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    text-align:center;
+  }
+
+  
+  .cc-stat-label{font-size:10px; font-weight:800; opacity:0.85; margin-bottom:2px;}
+  .cc-stat-val{font-size:16px; font-weight:900; line-height:1;}
+/* Single options pill */
+  .cc-options-pill{
+    margin-top: 14px;
+    flex: 1 1 auto;
+    min-height: 0;
+    display:flex;
+    background: rgba(255,255,255,0.88);
+    border: 1px solid rgba(0,0,0,0.25);
+    border-radius: 14px;
+    padding: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    overflow: hidden; position: relative;
+    box-sizing: border-box;
+  }
+  .cc-options-inner{
+    padding-bottom: 10px;
+    flex:1;
+    display:block;
+    column-count: 2;
+    column-gap: 16px;
+    column-fill: auto;
+    font-size: 13px;
+    line-height: 1.25;
+    transform-origin: top left;
+  }
+  .cc-sec{break-inside:auto; page-break-inside:auto; margin: 0 0 18px 0;}
+  .cc-sec-title{font-weight:900; margin: 0 0 6px 0; color:#111; font-size:15px;}
+
+  .cc-sec + .cc-sec{
+    border-top: 1px solid rgba(0,0,0,0.15);
+    padding-top: 8px;
+  }
+
+  .cc-list{margin:0; padding-left: 18px;}
+  .cc-item{margin: 0 0 6px 0;}
+  .cc-muted{color:#555; font-weight: 600;}
+
+  @media print{
+    body{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+    #generated-card-toolbar{display:none !important;}
+    #generated-card-overlay{position:static; padding:0;}
+    .print-card.clean-card{margin:0; box-shadow:none;}
+  }
+</style>
+
+<script>
+(function(){
+  function esc(s){
+    return (s==null?"":String(s))
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+  }
+  function brToText(html){
+    return (html||"").replace(/<br\s*\/?>/gi,"\n").replace(/&nbsp;/g," ");
+  }
+  function renderRulesHtml(main){
+    if (!main) return "";
+    var txt = String(main).replace(/<br\s*\/?>/gi,"\n");
+    var lines = txt.split(/\n+/);
+    return lines.map(function(l){
+      l = l.trim();
+      return l ? "<div>" + esc(l) + "</div>" : "";
+    }).join("");
+  }
+  function getBaseHref(){
+    var href = (window.location && window.location.href) ? window.location.href : "";
+    return href.replace(/[#?].*$/, "");
+  }
+  function buildHpPips(hp){
+    var n = Math.max(0, Math.min(99, parseInt(hp||0,10)||0));
+    var wrap = document.createElement("span");
+    wrap.className = "hp-pips";
+    for (var i=0;i<n;i++){
+      var d = document.createElement("span");
+      d.className = "hp-pip";
+      wrap.appendChild(d);
+      if ((i+1)%15===0 && (i+1)<n){
+        wrap.appendChild(document.createElement("br"));
+      }
+    }
+    return wrap;
+  }
+
+  function ensureOverlay(){
+    var ov = document.getElementById("generated-card-overlay");
+    if (!ov){
+      ov = document.createElement("div");
+      ov.id = "generated-card-overlay";
+      document.body.appendChild(ov);
+    }
+    return ov;
+  }
+
+  // Replace the existing Generate Card with a clean DOM-based renderer.
+  window.generateFighterCard = function(){
+    try{
+      var ov = ensureOverlay();
+      ov.innerHTML = "";
+
+      // toolbar
+      var tb = document.createElement("div");
+      tb.id = "generated-card-toolbar";
+
+      var btnBack = document.createElement("button");
+      btnBack.textContent = "Back";
+      btnBack.onclick = function(){
+        ov.style.display = "none";
+        document.body.style.overflow = "";
+      };
+
+      var btnPrint = document.createElement("button");
+      btnPrint.textContent = "Print";
+      btnPrint.onclick = function(){ window.print(); };
+
+      tb.appendChild(btnBack);
+      tb.appendChild(btnPrint);
+      ov.appendChild(tb);
+
+      // base URLs for assets (same as existing builder approach)
+      var baseHref = getBaseHref();
+      var logoUrl = (new URL("./img/mortalislogo.png", baseHref)).href;
+      var texUrl  = (new URL("./img/mortalistexture.jpg", baseHref)).href;
+
+      // card
+      var card = document.createElement("div");
+      card.className = "print-card clean-card";
+      card.style.backgroundImage = "url('" + texUrl + "')";
+
+      // logo
+      var logo = document.createElement("img");
+      logo.className = "cc-logo";
+      logo.src = logoUrl;
+      logo.alt = "Mortalis";
+      card.appendChild(logo);
+
+      // name + points
+      var nm = (fighter.name && fighter.name.trim()) ? fighter.name.trim() : "Fighter";
+      var total = computeTotal ? computeTotal() : 0;
+      var psyLabel = "No";
+      if (fighter.isMasterWarlock) psyLabel = "Master Psyker";
+      else if (fighter.isWarlock) psyLabel = "Psyker";
+
+      var top = document.createElement("div");
+      top.className = "cc-top";
+
+      var left = document.createElement("div");
+      left.className = "cc-leftpill";
+      var nameEl = document.createElement("div");
+      nameEl.className = "cc-name";
+      nameEl.textContent = nm;
+      var metaEl = document.createElement("div");
+      metaEl.className = "cc-meta";
+      metaEl.innerHTML = "Psyker: <b>" + esc(psyLabel) + "</b>";
+      left.appendChild(nameEl);
+      left.appendChild(metaEl);
+
+      var right = document.createElement("div");
+      right.className = "cc-right";
+      var pts = document.createElement("div");
+      pts.className = "cc-pts";
+      pts.textContent = total + " pts";
+
+      var hpBox = document.createElement("div");
+      hpBox.className = "cc-hp";
+      var hp = (fighter.stats && (fighter.stats.HP!=null)) ? fighter.stats.HP : (fighter.stats && fighter.stats.hp!=null ? fighter.stats.hp : 0);
+      var hpLabel = document.createElement("span");
+      hpLabel.textContent = "HP:";
+      hpBox.appendChild(hpLabel);
+      hpBox.appendChild(buildHpPips(hp));
+
+      right.appendChild(pts);
+      right.appendChild(hpBox);
+
+      top.appendChild(left);
+      top.appendChild(right);
+      card.appendChild(top);
+
+      // stats pills
+      var statsWrap = document.createElement("div");
+      statsWrap.className = "cc-stats";
+      var s = fighter.stats || {};
+      // order (attempt common Mortalis order; fall back to existing keys)
+      var order = ["Move","M","DEF","Defense","AP","HP","ATK","Attack","Fight","Shoot"];
+      var used = {};
+      order.forEach(function(k){
+        var v = (s[k]!=null)?s[k]:null;
+        if (v==null) return;
+        used[k]=true;
+        var p = document.createElement("div");
+        p.className = "cc-stat";
+        p.innerHTML = "<div class=\"cc-stat-label\">" + esc(k) + "</div><div class=\"cc-stat-val\">" + esc(v) + "</div>";
+        statsWrap.appendChild(p);
+      });
+      Object.keys(s).forEach(function(k){
+        if (used[k]) return;
+        var p = document.createElement("div");
+        p.className = "cc-stat";
+        p.innerHTML = "<div class=\"cc-stat-label\">" + esc(k) + "</div><div class=\"cc-stat-val\">" + esc(s[k]) + "</div>";
+        statsWrap.appendChild(p);
+      });
+      card.appendChild(statsWrap);
+
+      // options pill
+      var optPill = document.createElement("div");
+      optPill.className = "cc-options-pill";
+      var optInner = document.createElement("div");
+      optInner.className = "cc-options-inner";
+      optPill.appendChild(optInner);
+      card.appendChild(optPill);
+
+      function addSection(title, arr, mainKey){
+        if (!arr || !arr.length) return;
+        var sec = document.createElement("div");
+        sec.className = "cc-sec";
+        var t = document.createElement("div");
+        t.className = "cc-sec-title";
+        t.textContent = title;
+        sec.appendChild(t);
+
+        var ul = document.createElement("ul");
+        ul.className = "cc-list";
+        arr.forEach(function(x){
+          var li = document.createElement("li");
+          li.className = "cc-item";
+          var pts = x.points || 0;
+          var main = x.profile || x.effect || "";
+          var rulesHtml = renderRulesHtml(main);
+          li.innerHTML = "<b>" + esc(x.name) + "</b> <span class='cc-muted'>(" + pts + " pts)</span>" +
+                         (rulesHtml ? "<br><span class='cc-muted'>" + rulesHtml + "</span>" : "");
+          ul.appendChild(li);
+        });
+        sec.appendChild(ul);
+        optInner.appendChild(sec);
+      }
+
+      addSection("Close Combat Weapons", fighter.ccWeapons);
+      addSection("Ranged Weapons", fighter.rangedWeapons);
+      addSection("Abilities", fighter.abilities);
+      addSection("Leader Abilities", fighter.leaderAbilities);
+      addSection("Psychic Powers", fighter.spells);
+      addSection("Equipment", fighter.equipment);
+
+      // mount
+      ov.appendChild(card);
+      ov.style.display = "block";
+      document.body.style.overflow = "hidden";
+
+      // autoscale only options: use scrollWidth overflow from columns
+      function fitOptions(){
+        try{
+          var availH = optPill.clientHeight;
+          var availW = optPill.clientWidth;
+
+          // Constrain the column box to the pill height
+          optInner.style.height = availH + "px";
+          optInner.style.width = "100%";
+          optInner.style.transformOrigin = "top left";
+
+          function applyScale(s){
+            optInner.style.transform = "scale(" + s.toFixed(4) + ")";
+            optInner.style.width = (100/s).toFixed(2) + "%";
+          }
+
+          // Start at 1 and only shrink as needed (binary search for best fit).
+          var lo = 0.35, hi = 1.0, best = 1.0;
+
+          // helper: does it overflow the pill?
+          function overflows(){
+            // scrollWidth in columns == extra columns to the right
+            var totalW = optInner.scrollWidth || 0;
+            var totalH = optInner.scrollHeight || 0;
+            return (totalW > availW + 1) || (totalH > availH + 1);
+          }
+
+          applyScale(1.0);
+          if (!overflows()){
+            // perfect, no scaling needed
+            return;
+          }
+
+          // Find maximum scale that fits
+          for (var i=0;i<10;i++){
+            var mid = (lo + hi) / 2;
+            applyScale(mid);
+            if (overflows()){
+              hi = mid;          // still too big, go smaller
+            } else {
+              best = mid;        // fits, try bigger
+              lo = mid;
+            }
+          }
+          applyScale(best);
+        }catch(e){}
+      }function fitSoon(){
+        requestAnimationFrame(function(){ requestAnimationFrame(fitOptions); });
+      }
+      fitSoon();
+      // re-fit after logo image loads (affects layout) and after a short delay
+      try{ logo.addEventListener("load", fitSoon); }catch(e){}
+      setTimeout(fitSoon, 120);
+      // re-fit on resize while overlay is open
+      window.addEventListener("resize", function(){
+        if (ov && ov.style && ov.style.display === "block") fitSoon();
+      }, { passive:true });
+
+      requestAnimationFrame(function(){ requestAnimationFrame(fitOptions); });
+
+    }catch(e){
+      alert("Generate Card failed: " + e);
+    }
+  };
+})();
+</script>
+
 </body>
 </html>
