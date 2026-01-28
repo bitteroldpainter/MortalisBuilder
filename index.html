@@ -3149,42 +3149,41 @@ window.copyFighterText = function () {
           optInner.style.width = "100%";
           optInner.style.transformOrigin = "top left";
 
+          // Measure natural (unscaled) overflow once
+          optInner.style.transform = "scale(1)";
+          var totalW = optInner.scrollWidth || 0;
+          var totalH = optInner.scrollHeight || 0;
+
           function applyScale(s){
             optInner.style.transform = "scale(" + s.toFixed(4) + ")";
             optInner.style.width = (100/s).toFixed(2) + "%";
           }
 
-          // Start at 1 and only shrink as needed (binary search for best fit).
-          var lo = 0.35, hi = 1.0, best = 1.0;
-
-          // helper: does it overflow the pill?
-          function overflows(){
-            // scrollWidth in columns == extra columns to the right
-            var totalW = optInner.scrollWidth || 0;
-            var totalH = optInner.scrollHeight || 0;
-            return (totalW > availW + 1) || (totalH > availH + 1);
+          function fits(s){
+            // scrollWidth/scrollHeight do NOT change with transform, so we must scale the measurements ourselves.
+            return (totalW * s <= availW + 1) && (totalH * s <= availH + 1);
           }
 
-          applyScale(1.0);
-          if (!overflows()){
-            // perfect, no scaling needed
+          // Start at 1 and only shrink as needed (binary search for best fit).
+          if (fits(1.0)) {
+            applyScale(1.0);
             return;
           }
 
-          // Find maximum scale that fits
-          for (var i=0;i<10;i++){
+          var lo = 0.30, hi = 1.0, best = 0.30;
+          for (var i=0;i<12;i++){
             var mid = (lo + hi) / 2;
-            applyScale(mid);
-            if (overflows()){
-              hi = mid;          // still too big, go smaller
-            } else {
-              best = mid;        // fits, try bigger
+            if (fits(mid)){
+              best = mid; // fits, try bigger
               lo = mid;
+            } else {
+              hi = mid;   // too big, go smaller
             }
           }
           applyScale(best);
         }catch(e){}
-      }function fitSoon(){
+      }
+      function fitSoon(){
         requestAnimationFrame(function(){ requestAnimationFrame(fitOptions); });
       }
       fitSoon();
