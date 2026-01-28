@@ -2806,7 +2806,7 @@ window.copyFighterText = function () {
     border: 2px solid #111;
     border-radius: 0;
     box-sizing: border-box;
-    padding: 16px 18px 18px;
+    padding: 10px 18px 18px;
     overflow: hidden; /* fixed frame */
     display:flex;
     flex-direction:column;
@@ -2815,8 +2815,8 @@ window.copyFighterText = function () {
     background-size: 600px auto;
   }
 
-  .cc-logo{width:22%; max-width:260px; height:auto; display:block; margin: 0 auto 12px auto; opacity:0.98;}
-  .cc-top{display:flex; justify-content:space-between; gap:12px; align-items:flex-start;}
+  .cc-logo{width:22%; max-width:260px; height:auto; display:block; margin: 0 auto 4px auto; opacity:0.98;}
+  .cc-top{margin-top:-6px;display:flex; justify-content:space-between; gap:12px; align-items:flex-start;}
   .cc-leftpill{
     background: rgba(255,255,255,0.92);
     border: 1px solid rgba(0,0,0,0.25);
@@ -2901,23 +2901,28 @@ window.copyFighterText = function () {
     border: 1px solid rgba(0,0,0,0.25);
     border-radius: 14px;
     padding: 10px;
+    padding-bottom: 20px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-    overflow: hidden; position: relative;
+    overflow: hidden;
+    position: relative; position: relative;
     box-sizing: border-box;
   }
   .cc-options-inner{
-    padding-bottom: 10px;
     flex:1;
     display:block;
+    /* Two-column flow */
     column-count: 2;
     column-gap: 16px;
     column-fill: auto;
-    font-size: 13px;
-    line-height: 1.25;
-    transform-origin: top left;
+    /* Scalable typography */
+    --opt-scale: 1;
+    font-size: calc(13px * var(--opt-scale));
+    line-height: calc(1.25 * var(--opt-scale));
+    padding-bottom: 10px;
+    
   }
   .cc-sec{break-inside:auto; page-break-inside:auto; margin: 0 0 18px 0;}
-  .cc-sec-title{font-weight:900; margin: 0 0 6px 0; color:#111; font-size:15px;}
+  .cc-sec-title{font-weight:900; margin: 0 0 6px 0; color:#111; font-size:1.15em;}
 
   .cc-sec + .cc-sec{
     border-top: 1px solid rgba(0,0,0,0.15);
@@ -2925,8 +2930,10 @@ window.copyFighterText = function () {
   }
 
   .cc-list{margin:0; padding-left: 18px;}
-  .cc-item{margin: 0 0 6px 0;}
+  .cc-item{margin: 0 0 6px 0;break-inside: avoid; page-break-inside: avoid;}
+
   .cc-muted{color:#555; font-weight: 600;}
+  .cc-item > div{break-inside: avoid; page-break-inside: avoid;}
 
   @media print{
     body{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
@@ -3141,46 +3148,50 @@ window.copyFighterText = function () {
       // autoscale only options: use scrollWidth overflow from columns
       function fitOptions(){
         try{
-          var availH = optPill.clientHeight;
-          var availW = optPill.clientWidth;
+          var cs = window.getComputedStyle(optPill);
+          var padL = parseFloat(cs.paddingLeft)  || 0;
+          var padR = parseFloat(cs.paddingRight) || 0;
+          var padT = parseFloat(cs.paddingTop)   || 0;
+          var padB = parseFloat(cs.paddingBottom)|| 0;
 
-          // Constrain the column box to the pill height
+          // Available content box inside the padded pill
+          var availH = Math.max(0, optPill.clientHeight - padT - padB);
+          var availW = Math.max(0, optPill.clientWidth  - padL - padR);
+
+          optInner.style.boxSizing = "border-box";
           optInner.style.height = availH + "px";
-          optInner.style.width = "100%";
-          optInner.style.transformOrigin = "top left";
-
-          // Measure natural (unscaled) overflow once
-          optInner.style.transform = "scale(1)";
-          var totalW = optInner.scrollWidth || 0;
-          var totalH = optInner.scrollHeight || 0;
+          optInner.style.width  = availW + "px";
 
           function applyScale(s){
-            optInner.style.transform = "scale(" + s.toFixed(4) + ")";
-            optInner.style.width = (100/s).toFixed(2) + "%";
+            optInner.style.setProperty("--opt-scale", s.toFixed(4));
+          }
+          function fits(){
+            // With font-size scaling, scrollWidth/scrollHeight reflect the real layout.
+            var w = optInner.scrollWidth || 0;
+            var h = optInner.scrollHeight || 0;
+            return (w <= availW + 1) && (h <= availH + 1);
           }
 
-          function fits(s){
-            // scrollWidth/scrollHeight do NOT change with transform, so we must scale the measurements ourselves.
-            return (totalW * s <= availW + 1) && (totalH * s <= availH + 1);
-          }
+          applyScale(1.0);
+          if (fits()) return;
 
-          // Start at 1 and only shrink as needed (binary search for best fit).
-          if (fits(1.0)) {
-            applyScale(1.0);
-            return;
-          }
-
-          var lo = 0.30, hi = 1.0, best = 0.30;
-          for (var i=0;i<12;i++){
+          // Allow deeper shrinking to guarantee fit (prevents text escaping below pill)
+          var lo = 0.20, hi = 1.0, best = 0.20;
+          for (var i=0;i<14;i++){
             var mid = (lo + hi) / 2;
-            if (fits(mid)){
-              best = mid; // fits, try bigger
+            applyScale(mid);
+            if (fits()){
+              best = mid;
               lo = mid;
             } else {
-              hi = mid;   // too big, go smaller
+              hi = mid;
             }
           }
           applyScale(best);
+
+          // Final clamp: if still overflowing (e.g. single huge unbreakable entry),
+          // force hidden overflow so nothing draws outside the pill.
+          optInner.style.overflow = "hidden";
         }catch(e){}
       }
       function fitSoon(){
