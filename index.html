@@ -1159,20 +1159,20 @@
       // EQUIPMENT (unchanged from previous working version)
       var EQUIPMENT = [
         {
-          id: "healingPotions",
-          name: "Healing Potions (+)",
+          id: "medipackKIT",
+          name: "Medipack Kit (+)",
           points: 4,
           effect: '1 AP: Friendly Fighter within 1" regains 2D3 lost HP.'
         },
         {
-          id: "spotterFamiliar",
-          name: "Spotter Familiar",
+          id: "scannerAuspex",
+          name: "Scanner/Auspex",
           points: 4,
           effect: "1 AP: Mark an enemy in LoS. Shooting vs that Fighter gains Reroll (SR) until next turn."
         },
         {
-          id: "teleportArtifact",
-          name: "Magical Teleport Artifact (+)",
+          id: "blinkPack",
+          name: "Blink Pack/Personal Teleporter (+)",
           points: "+50% Stat cost",
           dynamicType: "percentStats",
           dynamicFactor: 0.5,
@@ -1181,7 +1181,7 @@
         },
         {
           id: "flightDevice",
-          name: "Magical Flight / Aerial Device / Wings",
+          name: "Jump Pack/Rokkit Pack/Wings",
           points: "+33% Stat cost",
           dynamicType: "percentStats",
           dynamicFactor: 1/3,
@@ -1195,8 +1195,8 @@
           effect: 'Friendly Fighters within 3" gain +1 to Hit with CC and Shooting attacks.'
         },
         {
-          id: "bomb",
-          name: "Bomb (+)",
+          id: "demolitions",
+          name: "Demolitions (+)",
           points: 6,
           effect:
             "Once per game plant an Explosive Device while moving. 1 AP to detonate: ATK 4, Hit 2+, DMG 5/6, Piercing (-2), Blast (2\")."
@@ -1208,59 +1208,59 @@
           effect: 'Ignore the first 2" of vertical repositioning.'
         },
         {
-          id: "ancientRelic",
-          name: "Ancient Relic (+)",
+          id: "holyRelic",
+          name: "Holy Relic (+)",
           points: 3,
           effect: "User may ignore 1 normal damage attack per game."
         },
         {
-          id: "enchantedCloak",
-          name: "Enchanted Cloak",
+          id: "camoCloak",
+          name: "Camo Cloak",
           points: 4,
           effect:
             "User gains -1 to be hit when in Cover or Hidden (stacks with Cover/Hidden)."
         },
         {
-          id: "arcaneShield",
-          name: "Arcane Shield (+)",
+          id: "forceField",
+          name: "Force Field (+)",
           points: 5,
           effect: "User gains a 9+ Aegis save."
         },
         {
-          id: "enhancingPotions",
-          name: "Enhancing Potions",
+          id: "combatDrugs",
+          name: "Combat Drugs",
           points: 4,
           effect:
             "At start of activation choose: (1) Heal 2D3 HP, (2) Reroll (SR) on CC attacks this turn, or (3) +2\" Move this turn."
         },
         {
-          id: "rareArcaneShield",
-          name: "Rare Arcane Shield (+)",
+          id: "mastercraftedForcefield",
+          name: "Mastercrafted Force Field (+)",
           points: 10,
           effect: "User gains a 7+ Aegis save."
         },
         {
-          id: "heavilyMuscled",
-          name: "Heavily Muscled",
+          id: "suspensorSystem",
+          name: "Suspensor System",
           points: 3,
           effect: "User’s Heavy Weapons gain the “Heavy (Move)” Special Rule."
         },
         {
-          id: "arcaneFamiliar",
-          name: "Arcane Familiar",
+          id: "reconDrone",
+          name: "Recon Drone/Servo Skull",
           points: 4,
           effect:
             "1 AP: Mark an enemy in LoS. Shooting vs that Fighter ignores negative To Hit modifiers from Light Cover and Hidden until end of turn."
         },
         {
-          id: "warHorn",
-          name: "War Horn / Instrument (+)",
+          id: "commsEquipment",
+          name: "Comms Equipment (+)",
           points: 4,
           effect: '1 AP: Grant a friendly Fighter within 9" +1 AP this round.'
         },
         {
-          id: "ringOfProtection",
-          name: "Ring of Protection (+)",
+          id: "shimmerShield",
+          name: "Shimmershield (+)",
           points: 4,
           effect:
             "User and friendly Fighters within 2\" reduce Piercing of enemy Shooting attacks by 2."
@@ -1273,22 +1273,22 @@
             'Treat any wall <1" thick as Accessible Terrain (may move through at cost of 1" Move).'
         },
         {
-          id: "clawedGloves",
-          name: "Clawed Gloves (+)",
+          id: "digitalWeapons",
+          name: "Digital Weapons (+)",
           points: 2,
           effect:
             "At the start of this Fighter’s CC activation, deal 2 MW to the engaged enemy Fighter."
         },
         {
-          id: "magicalShield",
-          name: "Magical Shield (+)",
+          id: "stormShield",
+          name: "Storm Shield (+)",
           points: 5,
           effect:
             "User gains a 7+ Aegis save and 4 Defense dice in CC when using this shield. May only have Pistol and/or CC weapons as ranged options."
         },
         {
-          id: "artifactOfDisruption",
-          name: "Artifact of Disruption (+)",
+          id: "commsJammer",
+          name: "Comms Jammer (+)",
           points: 5,
           effect:
             "1 AP: Select a visible enemy Fighter; that Fighter must be activated last by your opponent this turn."
@@ -1308,8 +1308,8 @@
             'While visible and within 3" of enemy Fighters, those Fighters reduce the Attack characteristic of their Melee and Ranged weapons by 1.'
         },
         {
-          id: "spottingTelescope",
-          name: "Spotting Telescope (+)",
+          id: "commandUplink",
+          name: "Command Uplink (+)",
           points: 5,
           effect: "Gain 1 extra FP at the start of the battle."
         },
@@ -1321,22 +1321,22 @@
             "Add +1 to both Damage values of this Fighter’s Ranged weapons. Cannot be used on Heavy Weapons."
         },
         {
-          id: "cannonsBehindLines",
-          name: "Cannons Behind the Lines (+)",
+          id: "targetingDesignator",
+          name: "Targeting Designator (+)",
           points: 14,
           effect:
             'Gain an additional Ranged weapon: Cannon Strike – ATK 4, Hit 6+, DMG 3/5, Blast (2"), Heavy (Dash), may be used while Hidden.'
         },
         {
-          id: "telescopicSight",
-          name: "Telescopic Sight",
+          id: "laserSight",
+          name: "Laser Sight",
           points: 3,
           effect:
             'This Fighter’s Ranged weapons with “Rng X” gain +1" range (except Flamers and Grenades).'
         },
         {
-          id: "rope",
-          name: "Rope",
+          id: "gravShute",
+          name: "Grav Shute/Sliders",
           points: 3,
           effect: "This Fighter ignores vertical height when dropping down."
         },
@@ -1348,19 +1348,27 @@
             "Enemy Fighters can only score Critical Hits on 11+ in CC against this Fighter."
         },
         {
-          id: "scoutingIntel",
-          name: "Scouting Intel",
+          id: "operationalIntelligence",
+          name: "Operational Intelligence",
           points: 4,
           effect:
             "Once per battle you may reroll the initiative roll. With Random Activation, return the drawn token and pull another."
         },
+          {
+          id: "markerLights",
+          name: "Markerlights",
+          points: 5,
+          effect:
+            "1 AP action: Place a Markerlight token on an enemy Fighter in this Fighters line of sight. When a Fighter with the Markerlights ability is shooting at a Fighter with Markerlights tokens, its weapons gain No Cover (if 1 token) and No Cover + Reroll(1) (if 2 tokens)"
+        },
         {
-          id: "voltaicSuit",
-          name: "Voltaic Suit",
+          id: "hyperstaticField",
+          name: "Hyperstatic Field",
           points: 5,
           effect:
             'Whenever an enemy Fighter moves within 1", roll 3D12; for each 9+ that enemy suffers 1 MW.'
         }
+          
       ];
 
       // FIGHTER STATE
@@ -3306,3 +3314,10 @@ p.innerHTML = "<div class=\"cc-stat-label\">" + esc(k) + "</div><div class=\"cc-
 
 </body>
 </html>
+                  {
+          id: "markerLights",
+          name: "Markerlights",
+          points: 5,
+          effect:
+            "1 AP action: Place a Markerlight token on an enemy Fighter in this Fighters line of sight. When a Fighter with the Markerlights ability is shooting at a Fighter with Markerlights tokens, its weapons gain No Cover (if 1 token) and No Cover + Reroll(1) (if 2 tokens)"
+        
