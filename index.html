@@ -27,7 +27,22 @@
       align-items: center;
       margin-bottom: 1rem;
     }
-    .top-title {
+    
+
+    .top-actions{
+      display:flex;
+      gap:0.5rem;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .top-actions .tab-pill,
+    .top-actions .tab-pill-colour{
+      border-radius: 999px;
+      padding: 0.3rem 0.75rem;
+      font-size: 0.85rem;
+    }
+.top-title {
       font-size: 1.4rem;
       font-weight: 600;
     }
@@ -372,13 +387,111 @@
       body.print-card-mode #generated-card-toolbar{ display:none !important; }
     }
 
+
+
+    /* ===== Portrait Cropper Overlay ===== */
+    #portrait-cropper-overlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.78);
+      display: none;
+      z-index: 99999;
+      padding: 22px 14px;
+      overflow: auto;
+    }
+    #portrait-cropper-overlay.show{ display:block; }
+    #portrait-cropper-overlay .pc-modal{
+      max-width: 1100px;
+      margin: 0 auto;
+      background: #1E2024;
+      border: 1px solid #2a2d31;
+      border-radius: 14px;
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.55);
+    }
+    @media (max-width: 980px){
+      #portrait-cropper-overlay .pc-modal{ grid-template-columns: 1fr; }
+    }
+    .pc-panel .pc-title{ font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
+    .pc-panel .pc-sub{ font-size: 0.85rem; color:#9aa1a8; line-height: 1.35; margin-bottom: 12px; }
+    .pc-panel input[type="file"]{
+      width: 100%;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px dashed #2a2d31;
+      background:#141619;
+      color:#e4e7eb;
+    }
+    .pc-actions{ display:flex; gap:0.5rem; flex-wrap:wrap; margin-top: 10px; }
+    .pc-stage{ position:relative; display:flex; justify-content:center; align-items:center; min-height: 520px; }
+    #pc-canvas{
+      width: 100%;
+      max-width: 760px;
+      height: auto;
+      background:#0b0d12;
+      border: 1px solid #2a2d31;
+      border-radius: 16px;
+      touch-action:none;
+      display:block;
+    }
+    .pc-badge{
+      position:absolute;
+      top: 12px;
+      left: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(20,22,25,.85);
+      border: 1px solid #2a2d31;
+      color:#9aa1a8;
+      font-size: 0.82rem;
+      backdrop-filter: blur(6px);
+    }
+    .pc-warn{
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,180,74,.35);
+      background: rgba(255,180,74,.08);
+      color: #ffd7a3;
+      font-size: 0.85rem;
+      line-height: 1.35;
+    }
+
+    /* ===== Fighter Card Portrait Placement ===== */
+    .cc-portrait-wrap{
+      width: 240px;
+      height: 208px;
+      margin-top: 10px;
+      background: transparent;
+    }
+    .cc-portrait-img{
+      width: 100%;
+      height: 100%;
+      object-fit: contain; /* preserves full 682×592 frame */
+      display:block;
+    }
+
 </style>
 </head>
 <body>
   <div class="app">
     <header class="top-bar">
+
      <div class="top-title">Mortalis Fighter Builder</div>
-    </header>
+     <div class="top-actions">
+       <button class="tab-pill-colour" id="btn-save-json" type="button">Save Profile</button>
+       <label class="tab-pill" style="cursor:pointer;">
+         Load Profile
+         <input id="file-load-json" type="file" accept="application/json" hidden>
+       </label>
+
+       <button class="tab-pill" id="btn-portrait" type="button" title="Crop / set portrait">Portrait</button>
+ 
+     </div>
+</header>
 
     <main>
       <!-- Stats always visible -->
@@ -404,6 +517,36 @@
       <section id="section-equipment"></section>
       <section id="section-summary"></section>
     </main>
+  </div>
+
+  
+  <!-- Portrait Cropper Overlay -->
+  <div id="portrait-cropper-overlay" aria-hidden="true">
+    <div class="pc-modal">
+      <div class="pc-panel">
+        <div class="pc-title">Triangle Portrait Cropper</div>
+        <div class="pc-sub">Upload a photo, then <b>drag</b> to move and <b>scroll</b> (or pinch) to zoom. Output: <b>682×592</b>, triangle points <b>down</b>. Border: <b>8px</b> #D8E2D7.</div>
+
+        <input id="pc-file" type="file" accept="image/*" />
+
+        <div class="pc-actions">
+          <button class="tab-pill" id="pc-fit" type="button">Fit</button>
+          <button class="tab-pill" id="pc-reset" type="button">Reset</button>
+        </div>
+
+        <div class="pc-actions">
+          <button class="tab-pill-colour" id="pc-use" type="button">Use Portrait</button>
+          <button class="tab-pill" id="pc-close" type="button">Close</button>
+        </div>
+
+        <div id="pc-warn" class="pc-warn" style="display:none;"></div>
+      </div>
+
+      <div class="pc-stage">
+        <div class="pc-badge" id="pc-badge">No image loaded • 682×592</div>
+        <canvas id="pc-canvas" width="682" height="592"></canvas>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -1374,6 +1517,7 @@
       // FIGHTER STATE
       var fighter = {
         name: "",
+        portraitDataUrl: "",
         stats: {},
         ccWeapons: [],
         rangedWeapons: [],
@@ -1503,6 +1647,18 @@ html += "</div>";
         html += "</div>";
         container.innerHTML = html;
 
+        // --- Fighter name input ---
+        var nameInput = container.querySelector("#fighter-name-input");
+        if (nameInput){
+          nameInput.value = fighter.name || "";
+          nameInput.addEventListener("input", function(){
+            fighter.name = nameInput.value || "";
+            refreshTotal();
+            updateSummary();
+          });
+        }
+
+
         // Name input handler
         var nameInput = document.getElementById("fighter-name-input");
         if (nameInput) {
@@ -1589,8 +1745,7 @@ html += "</div>";
           var baseHref = (window.location && window.location.href) ? window.location.href : "";
           baseHref = baseHref.replace(/[#?].*$/, "");
           baseHref = baseHref.replace(/[^\/]*$/, "");
-          var logoUrl = (new URL("./img/mortalislogo.png", baseHref)).href;
-          var texUrl  = (new URL("./img/mortalistexture.jpg", baseHref)).href;
+var texUrl  = (new URL("./img/mortalistexture.jpg", baseHref)).href;
 
           // HP pips (rows of 15)
           var hpVal = Number(fighter.stats && fighter.stats.hp ? fighter.stats.hp : 0) || 0;
@@ -1680,9 +1835,7 @@ html += "</div>";
                 "<button onclick='window.print()' style='padding:8px 10px;border-radius:10px;border:1px solid #222;background:#fff;font-weight:800;cursor:pointer;'>Print</button>" +
               "</div>" +
               "<div class='print-card card'>" +
-                "<div style='width:100%;display:block;text-align:center;margin:0 0 12px 0;'>" +
-                  "<img src='" + logoUrl + "' style='width:66%;max-width:260px;height:auto;display:inline-block;opacity:0.98;'>" +
-                "</div>" +
+                "<div style='width:100%;display:block;text-align:center;margin:0 0 12px 0;'>" +"</div>" +
                 "<div class='top'>" +
                   "<div class='left-pill'><div class='name'>" + esc(nm) + "</div><div class='meta'>Psyker: <b>" + esc(psyLabel) + "</b></div></div>" +
                   "<div class='right'>" +
@@ -1951,10 +2104,11 @@ window.copyFighterText = function () {
         if (!container) return;
 
         var i, cfg;
-        // Initialize stats to base values
+        // Initialize missing stats to base values (do not overwrite loaded/imported values)
+        if (!fighter.stats) fighter.stats = {};
         for (i = 0; i < STAT_CONFIG.length; i++) {
           cfg = STAT_CONFIG[i];
-          fighter.stats[cfg.key] = cfg.base;
+          if (fighter.stats[cfg.key] == null) fighter.stats[cfg.key] = cfg.base;
         }
 
         var html = '<div class="card"><h2>Core Stats</h2>';
@@ -1982,7 +2136,7 @@ window.copyFighterText = function () {
             + '  <div class="stat-pill-label">' + cfg.label + '</div>'
             + '  <div class="stat-pill-controls">'
             + '    <button class="stat-btn-vert stat-up">▲</button>'
-            + '    <div class="stat-pill-value"><span class="value-text">' + cfg.base + '</span>' + cfg.unit + '</div>'
+            + '    <div class="stat-pill-value"><span class="value-text">' + fighter.stats[cfg.key] + '</span>' + cfg.unit + '</div>'
             + '    <button class="stat-btn-vert stat-down">▼</button>'
             + '  </div>'
             + '</div>';
@@ -2021,7 +2175,9 @@ window.copyFighterText = function () {
           if (!cfgLocal) return;
 
           var valueEl = pill.querySelector(".value-text");
-          var upBtn = pill.querySelector(".stat-up");
+          
+          valueEl.textContent = fighter.stats[key];
+var upBtn = pill.querySelector(".stat-up");
           var downBtn = pill.querySelector(".stat-down");
 
           upBtn.addEventListener("click", function () {
@@ -2790,6 +2946,580 @@ window.copyFighterText = function () {
       }
 
       // INIT
+
+      // ================= JSON Save/Load + Autosave =================
+      var MRFB_STORAGE_KEY = "mortalis_fighter_autosave_v1";
+
+      function deepClone(obj){
+        try { return JSON.parse(JSON.stringify(obj)); }
+        catch(e){ return null; }
+      }
+
+      function buildExportPayload(){
+        // Ensure all derived values are up to date before exporting
+        try{
+          recalcStatCost();
+          recalcWarlockCost();
+          recalcWeaponPoints();
+          recalcAbilityPoints();
+        }catch(e){}
+        return {
+          app: "Mortalis Fighter Builder",
+          version: 1,
+          savedAt: new Date().toISOString(),
+          fighter: deepClone(fighter)
+        };
+      }
+
+      function downloadJson(filename, dataObj){
+        var jsonStr = JSON.stringify(dataObj, null, 2);
+        var blob = new Blob([jsonStr], { type: "application/json" });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function(){
+          try{ URL.revokeObjectURL(url); }catch(e){}
+          try{ document.body.removeChild(a); }catch(e){}
+        }, 0);
+      }
+
+      function safeAssign(target, src){
+        if (!src || typeof src !== "object") return;
+        Object.keys(src).forEach(function(k){ target[k] = src[k]; });
+      }
+
+      function applyImportedFighterState(imported){
+        if (!imported || typeof imported !== "object") throw new Error("Invalid JSON (no fighter object).");
+
+        // Replace top-level scalar/flags
+        fighter.name = imported.name || "";
+        fighter.isWarlock = !!imported.isWarlock;
+        fighter.isMasterWarlock = !!imported.isMasterWarlock;
+
+        // Portrait (optional)
+        fighter.portraitDataUrl = (typeof imported.portraitDataUrl === "string") ? imported.portraitDataUrl : (fighter.portraitDataUrl || "");
+
+        // Stats
+        if (!fighter.stats) fighter.stats = {};
+        safeAssign(fighter.stats, imported.stats || {});
+
+        // Lists (replace arrays)
+        fighter.ccWeapons = Array.isArray(imported.ccWeapons) ? imported.ccWeapons : [];
+        fighter.rangedWeapons = Array.isArray(imported.rangedWeapons) ? imported.rangedWeapons : [];
+        fighter.abilities = Array.isArray(imported.abilities) ? imported.abilities : [];
+        fighter.leaderAbilities = Array.isArray(imported.leaderAbilities) ? imported.leaderAbilities : [];
+        fighter.spells = Array.isArray(imported.spells) ? imported.spells : [];
+        fighter.equipment = Array.isArray(imported.equipment) ? imported.equipment : [];
+
+        // Points block: keep base if present, otherwise default
+        if (!fighter.points) fighter.points = {};
+        var baseDefault = 16;
+        fighter.points.base = (imported.points && typeof imported.points.base === "number") ? imported.points.base : (fighter.points.base || baseDefault);
+
+        // Recompute all derived points and refresh UI
+        recalcStatCost();
+        recalcWarlockCost();
+        recalcWeaponPoints();
+        recalcAbilityPoints();
+
+        // Re-render all panels to ensure checkboxes + selected lists match
+        initStats();
+        initWeaponsCC();
+        initWeaponsRanged();
+        initSimplePanel("section-abilities", "Fighter Abilities", FIGHTER_ABILITIES, "abilities", false, null);
+        initSimplePanel("section-leader",   "Leader Abilities",  LEADER_ABILITIES,  "leaderAbilities", false, 2);
+        initSimplePanel("section-spells",   "Spells",            SPELLS,            "spells", true, null);
+        initSimplePanel("section-equipment","Equipment",         EQUIPMENT,         "equipment", false, null);
+
+        refreshTotal();
+        updateSummary();
+        try{ initTabs(); }catch(e){}
+      }
+
+      function importFromJsonText(jsonText){
+        var parsed;
+        try { parsed = JSON.parse(jsonText); } catch(e){ throw new Error("Invalid JSON."); }
+
+        // Accept either {fighter:{...}} payloads or plain fighter objects
+        var f = parsed && parsed.fighter ? parsed.fighter : parsed;
+        applyImportedFighterState(f);
+      }
+
+      function autosaveNow(){
+        try{
+          var payload = buildExportPayload();
+          if (!payload || !payload.fighter) return;
+          localStorage.setItem(MRFB_STORAGE_KEY, JSON.stringify(payload));
+        }catch(e){}
+      }
+
+      var __autosaveTimer = null;
+      function autosaveSoon(){
+        if (__autosaveTimer) clearTimeout(__autosaveTimer);
+        __autosaveTimer = setTimeout(function(){
+          __autosaveTimer = null;
+          autosaveNow();
+        }, 650);
+      }
+
+      function tryLoadAutosave(){
+        try{
+          var raw = localStorage.getItem(MRFB_STORAGE_KEY);
+          if (!raw) return;
+          var parsed = JSON.parse(raw);
+          if (!parsed) return;
+          if (!parsed.fighter) return;
+          applyImportedFighterState(parsed.fighter);
+        }catch(e){
+          // ignore
+        }
+      }
+
+      function clearAutosave(){
+        try{
+          if (__autosaveTimer) { clearTimeout(__autosaveTimer); __autosaveTimer = null; }
+          localStorage.removeItem(MRFB_STORAGE_KEY);
+        }catch(e){}
+      }
+
+      function setupJsonUi(){
+        var btnSave = document.getElementById("btn-save-json");
+        var inputLoad = document.getElementById("file-load-json");
+        var btnClear = document.getElementById("btn-clear-autosave");
+
+        if (btnSave){
+          btnSave.addEventListener("click", function(){
+            var payload = buildExportPayload();
+            var nm = (fighter.name && fighter.name.trim()) ? fighter.name.trim() : "fighter";
+            var safe = nm.replace(/[^\w\-]+/g, "_").slice(0, 50) || "fighter";
+            downloadJson("mortalis_" + safe + ".json", payload);
+          });
+        }
+
+        if (inputLoad){
+          inputLoad.addEventListener("change", function(){
+            var file = this.files && this.files[0];
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function(){
+              try{
+                importFromJsonText(String(reader.result || ""));
+                autosaveNow(); // immediately update local autosave with loaded state
+                alert("Loaded!");
+              }catch(e){
+                alert("Load failed: " + e.message);
+              }
+              inputLoad.value = ""; // reset so re-loading same file triggers change
+            };
+            reader.onerror = function(){ alert("Load failed: could not read file."); inputLoad.value = ""; };
+            reader.readAsText(file);
+          });
+        }
+
+        if (btnClear){
+          btnClear.addEventListener("click", function(){
+            clearAutosave();
+            alert("Autosave cleared.");
+          });
+        }
+
+        // Generic autosave: catch most interactions without editing every handler
+        document.addEventListener("input", autosaveSoon, true);
+        document.addEventListener("change", autosaveSoon, true);
+        document.addEventListener("click", function(e){
+          // Ignore clicks on JSON/autosave controls so we don't immediately re-autosave after clearing
+          if (e.target && e.target.closest && e.target.closest("#btn-save-json, #btn-clear-autosave, #file-load-json")) return;
+          autosaveSoon();
+        }, true);
+      }
+
+
+// INIT
+
+      // ================= Portrait Cropper (Integrated) =================
+      (function(){
+        var btnPortrait = null;
+        var ov = null;
+        var fileEl = null, badgeEl = null, warnEl = null;
+        var cvs = null, ctx = null;
+
+        // Locked output size (must match your standalone cropper)
+        var OUT_W = 682, OUT_H = 592;
+        var TRI_BORDER_COLOR = "#D8E2D7";
+        var TRI_BORDER_WIDTH = 8;
+
+        // state
+        var img = null;
+        var imgReady = false;
+        var offsetX = 0, offsetY = 0, scale = 1;
+        var dragging = false, lastX = 0, lastY = 0;
+
+        var pointers = new Map();
+        var pinchStartDist = 0, pinchStartScale = 1;
+        var pinchMid = {x:0,y:0};
+        var pinchStartOffset = {x:0,y:0};
+
+        function setWarn(msg){
+          if (!warnEl) return;
+          if (!msg){
+            warnEl.style.display = "none";
+            warnEl.textContent = "";
+            return;
+          }
+          warnEl.textContent = msg;
+          warnEl.style.display = "block";
+        }
+
+        function clamp(n,a,b){ return Math.max(a, Math.min(b,n)); }
+
+        function trianglePath(w,h){
+          // Locked: pointing down
+          return [[0,0],[w,0],[w/2,h]];
+        }
+
+        function setCanvasSizeLocked(){
+          if (!cvs) return;
+          cvs.width = OUT_W;
+          cvs.height = OUT_H;
+        }
+
+        function canvasPointFromEvent(e){
+          var r = cvs.getBoundingClientRect();
+          var x = (e.clientX - r.left) * (cvs.width / r.width);
+          var y = (e.clientY - r.top)  * (cvs.height / r.height);
+          return {x:x,y:y};
+        }
+
+        function zoomAtCanvasPoint(factor, p){
+          var oldScale = scale;
+          var newScale = clamp(scale * factor, 0.05, 20);
+          if (newScale === oldScale) return;
+
+          var W = cvs.width, H = cvs.height;
+          var cx = W/2 + offsetX;
+          var cy = H/2 + offsetY;
+
+          var dx = p.x - cx;
+          var dy = p.y - cy;
+
+          var ratio = newScale / oldScale;
+          offsetX -= dx * (ratio - 1);
+          offsetY -= dy * (ratio - 1);
+
+          scale = newScale;
+          draw();
+        }
+
+        function resetView(){
+          offsetX = 0; offsetY = 0; scale = 1;
+          draw();
+        }
+
+        function fitToTriangle(){
+          if (!imgReady) return;
+          var W = cvs.width, H = cvs.height;
+          var iw = img.naturalWidth || img.width;
+          var ih = img.naturalHeight || img.height;
+
+          // cover the whole output frame
+          scale = Math.max(W/iw, H/ih);
+          offsetX = 0; offsetY = 0;
+          draw();
+        }
+
+        function draw(){
+          if (!ctx) return;
+          var W = cvs.width, H = cvs.height;
+          ctx.clearRect(0,0,W,H);
+
+          // Triangle clip
+          var pts = trianglePath(W,H);
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(pts[0][0], pts[0][1]);
+          ctx.lineTo(pts[1][0], pts[1][1]);
+          ctx.lineTo(pts[2][0], pts[2][1]);
+          ctx.closePath();
+          ctx.clip();
+
+          if (imgReady){
+            var iw = img.naturalWidth || img.width;
+            var ih = img.naturalHeight || img.height;
+            var dw = iw * scale;
+            var dh = ih * scale;
+            var x = (W/2 - dw/2) + offsetX;
+            var y = (H/2 - dh/2) + offsetY;
+            ctx.drawImage(img, x, y, dw, dh);
+
+            // border (inside clip so it never bleeds outside)
+            ctx.lineWidth = TRI_BORDER_WIDTH;
+            ctx.strokeStyle = TRI_BORDER_COLOR;
+            ctx.beginPath();
+            ctx.moveTo(pts[0][0], pts[0][1]);
+            ctx.lineTo(pts[1][0], pts[1][1]);
+            ctx.lineTo(pts[2][0], pts[2][1]);
+            ctx.closePath();
+            ctx.stroke();
+          } else {
+            ctx.save();
+            ctx.fillStyle = "rgba(255,255,255,.08)";
+            ctx.fillRect(0,0,W,H);
+            ctx.restore();
+          }
+
+          ctx.restore();
+
+          // Preview-only: darken outside triangle for clarity
+          ctx.save();
+          ctx.fillStyle = "rgba(0,0,0,.35)";
+          ctx.beginPath();
+          ctx.rect(0,0,W,H);
+          ctx.moveTo(pts[0][0], pts[0][1]);
+          ctx.lineTo(pts[1][0], pts[1][1]);
+          ctx.lineTo(pts[2][0], pts[2][1]);
+          ctx.closePath();
+          ctx.fill("evenodd");
+          ctx.restore();
+        }
+
+        function exportTrianglePNG(){
+          var W = OUT_W, H = OUT_H;
+          var off = document.createElement("canvas");
+          off.width = W; off.height = H;
+          var octx = off.getContext("2d", {alpha:true});
+
+          var pts = trianglePath(W,H);
+          octx.save();
+          octx.beginPath();
+          octx.moveTo(pts[0][0], pts[0][1]);
+          octx.lineTo(pts[1][0], pts[1][1]);
+          octx.lineTo(pts[2][0], pts[2][1]);
+          octx.closePath();
+          octx.clip();
+
+          var iw = img.naturalWidth || img.width;
+          var ih = img.naturalHeight || img.height;
+          var dw = iw * scale;
+          var dh = ih * scale;
+          var x = (W/2 - dw/2) + offsetX;
+          var y = (H/2 - dh/2) + offsetY;
+
+          octx.drawImage(img, x, y, dw, dh);
+
+          // baked border
+          octx.lineWidth = TRI_BORDER_WIDTH;
+          octx.strokeStyle = TRI_BORDER_COLOR;
+          octx.beginPath();
+          octx.moveTo(pts[0][0], pts[0][1]);
+          octx.lineTo(pts[1][0], pts[1][1]);
+          octx.lineTo(pts[2][0], pts[2][1]);
+          octx.closePath();
+          octx.stroke();
+
+          octx.restore();
+          return off.toDataURL("image/png");
+        }
+
+        function updatePortraitButton(){
+          if (!btnPortrait) return;
+          var has = (fighter && fighter.portraitDataUrl && String(fighter.portraitDataUrl).trim());
+          btnPortrait.textContent = has ? "Portrait ✓" : "Portrait";
+        }
+
+        function openPortrait(){
+          if (!ov) return;
+          setWarn(null);
+          ov.classList.add("show");
+          ov.setAttribute("aria-hidden","false");
+          document.body.style.overflow = "hidden";
+
+          // init canvas
+          setCanvasSizeLocked();
+          ctx = cvs.getContext("2d", { alpha:true });
+
+          // show badge
+          if (badgeEl) badgeEl.textContent = (imgReady ? "Loaded" : "No image loaded") + " • " + OUT_W + "×" + OUT_H;
+
+          // If we already have a portrait, keep it; otherwise just draw placeholder.
+          draw();
+        }
+
+        function closePortrait(){
+          if (!ov) return;
+          ov.classList.remove("show");
+          ov.setAttribute("aria-hidden","true");
+          document.body.style.overflow = "";
+          updatePortraitButton();
+        }
+
+        function wire(){
+          btnPortrait = document.getElementById("btn-portrait");
+          ov = document.getElementById("portrait-cropper-overlay");
+          fileEl = document.getElementById("pc-file");
+          badgeEl = document.getElementById("pc-badge");
+          warnEl = document.getElementById("pc-warn");
+          cvs = document.getElementById("pc-canvas");
+          if (!btnPortrait || !ov || !fileEl || !cvs) return;
+
+          // open/close
+          btnPortrait.addEventListener("click", function(){ openPortrait(); });
+          document.getElementById("pc-close").addEventListener("click", function(){ closePortrait(); });
+          ov.addEventListener("click", function(e){
+            if (e.target === ov) closePortrait();
+          });
+
+          // buttons
+          document.getElementById("pc-fit").addEventListener("click", function(){ setWarn(null); fitToTriangle(); });
+          document.getElementById("pc-reset").addEventListener("click", function(){ setWarn(null); resetView(); });
+
+          document.getElementById("pc-use").addEventListener("click", function(){
+            setWarn(null);
+            if (!imgReady){
+              setWarn("Load an image first.");
+              return;
+            }
+            try{
+              fighter.portraitDataUrl = exportTrianglePNG();
+              autosaveSoon();
+              updateSummary();
+              refreshTotal();
+              closePortrait();
+            }catch(err){
+              setWarn("Could not export the portrait. Try a different image file.");
+            }
+          });
+
+          // image load
+          fileEl.addEventListener("change", function(e){
+            var f = e.target.files && e.target.files[0];
+            if (!f) return;
+            setWarn(null);
+            if (badgeEl) badgeEl.textContent = "Loading…";
+
+            var url = URL.createObjectURL(f);
+            var im = new Image();
+            im.onload = function(){
+              img = im;
+              imgReady = true;
+              if (badgeEl) badgeEl.textContent = "Loaded • " + OUT_W + "×" + OUT_H;
+              fitToTriangle();
+              try{ URL.revokeObjectURL(url); }catch(_){}
+            };
+            im.onerror = function(){
+              imgReady = false;
+              if (badgeEl) badgeEl.textContent = "Failed to load image • " + OUT_W + "×" + OUT_H;
+              setWarn("Could not load that image. Try a JPG or PNG.");
+              try{ URL.revokeObjectURL(url); }catch(_){}
+              draw();
+            };
+            im.src = url;
+          });
+
+          // pointer / wheel controls
+          cvs.addEventListener("pointerdown", function(e){
+            cvs.setPointerCapture(e.pointerId);
+            pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+
+            if (pointers.size === 1){
+              dragging = true;
+              lastX = e.clientX;
+              lastY = e.clientY;
+            } else if (pointers.size === 2){
+              var pts = Array.from(pointers.values());
+              pinchStartDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+              pinchStartScale = scale;
+              pinchStartOffset = {x: offsetX, y: offsetY};
+
+              var midClient = {x:(pts[0].x+pts[1].x)/2, y:(pts[0].y+pts[1].y)/2};
+              var r = cvs.getBoundingClientRect();
+              pinchMid = {
+                x: (midClient.x - r.left) * (cvs.width / r.width),
+                y: (midClient.y - r.top)  * (cvs.height / r.height)
+              };
+            }
+          });
+
+          cvs.addEventListener("pointermove", function(e){
+            if (!pointers.has(e.pointerId)) return;
+            pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+
+            if (pointers.size === 1 && dragging){
+              var dx = e.clientX - lastX;
+              var dy = e.clientY - lastY;
+              lastX = e.clientX;
+              lastY = e.clientY;
+
+              var r = cvs.getBoundingClientRect();
+              offsetX += dx * (cvs.width / r.width);
+              offsetY += dy * (cvs.height / r.height);
+              draw();
+            } else if (pointers.size === 2){
+              var pts = Array.from(pointers.values());
+              var dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+              if (pinchStartDist > 0){
+                var factor = dist / pinchStartDist;
+                scale = clamp(pinchStartScale * factor, 0.05, 20);
+
+                var ratio = scale / pinchStartScale;
+                var W = cvs.width, H = cvs.height;
+                var cx0 = W/2 + pinchStartOffset.x;
+                var cy0 = H/2 + pinchStartOffset.y;
+                var dx = pinchMid.x - cx0;
+                var dy = pinchMid.y - cy0;
+
+                offsetX = pinchStartOffset.x - dx * (ratio - 1);
+                offsetY = pinchStartOffset.y - dy * (ratio - 1);
+                draw();
+              }
+            }
+          });
+
+          cvs.addEventListener("pointerup", function(e){
+            pointers.delete(e.pointerId);
+            dragging = false;
+            if (pointers.size === 1){
+              var remaining = Array.from(pointers.values())[0];
+              lastX = remaining.x; lastY = remaining.y;
+              dragging = true;
+            }
+          });
+
+          cvs.addEventListener("pointercancel", function(e){
+            pointers.delete(e.pointerId);
+            dragging = false;
+          });
+
+          cvs.addEventListener("wheel", function(e){
+            e.preventDefault();
+            if (!imgReady) return;
+            var p = canvasPointFromEvent(e);
+            var direction = Math.sign(e.deltaY);
+            var factor = direction > 0 ? 0.92 : 1.08;
+            zoomAtCanvasPoint(factor, p);
+          }, { passive:false });
+
+          // initial state
+          setCanvasSizeLocked();
+          ctx = cvs.getContext("2d", { alpha:true });
+          draw();
+          updatePortraitButton();
+        }
+
+        // expose a tiny helper if needed later
+        window.__drfb_openPortraitCropper = openPortrait;
+
+        // wire at DOMContentLoaded (builder uses DOMContentLoaded already, but this is safe)
+        document.addEventListener("DOMContentLoaded", function(){
+          try { wire(); } catch(e) { console.error(e); }
+          try { setupJsonUi(); } catch(e) { console.error(e); }
+   
+        });
+      })();
+
+
       document.addEventListener("DOMContentLoaded", function () {
         initStats();
         initWeaponsCC();
@@ -2852,11 +3582,26 @@ window.copyFighterText = function () {
     background-size: cover;
   }
 
-  .cc-logo{width:66%; max-width:260px; height:auto; display:block; margin: 0 auto; opacity:0.98;}
-
+  /* --- Big portrait behind header + stat pills (stops before options pill) --- */
+  .cc-topwrap{position:relative;}
+  .cc-bg-portrait{
+    position:absolute;
+    top:0;
+    left:50%;
+    transform:translateX(-50%);
+    height:100%;
+    width:auto;
+    max-width:none;
+    z-index:1;
+    pointer-events:none;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,.75));
+  }
+  /* Ensure header + stats + HP pips render above portrait */
+  .cc-header, .cc-stats{position:relative; z-index:5;}
+  .cc-hp, .hp-pips{position:relative; z-index:6;}
 .cc-header{
   display:grid;
-  grid-template-columns: 260px 1fr 260px; /* left | logo | right */
+  grid-template-columns: 260px 260px 260px; /* left | logo | right */
   align-items:start;
   gap:12px;
 }
@@ -2996,6 +3741,93 @@ window.copyFighterText = function () {
     #generated-card-overlay{position:static; padding:0;}
     .print-card.clean-card{margin:0; box-shadow:none;}
   }
+
+
+    /* ===== Portrait Cropper Overlay ===== */
+    #portrait-cropper-overlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.78);
+      display: none;
+      z-index: 99999;
+      padding: 22px 14px;
+      overflow: auto;
+    }
+    #portrait-cropper-overlay.show{ display:block; }
+    #portrait-cropper-overlay .pc-modal{
+      max-width: 1100px;
+      margin: 0 auto;
+      background: #1E2024;
+      border: 1px solid #2a2d31;
+      border-radius: 14px;
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.55);
+    }
+    @media (max-width: 980px){
+      #portrait-cropper-overlay .pc-modal{ grid-template-columns: 1fr; }
+    }
+    .pc-panel .pc-title{ font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
+    .pc-panel .pc-sub{ font-size: 0.85rem; color:#9aa1a8; line-height: 1.35; margin-bottom: 12px; }
+    .pc-panel input[type="file"]{
+      width: 100%;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px dashed #2a2d31;
+      background:#141619;
+      color:#e4e7eb;
+    }
+    .pc-actions{ display:flex; gap:0.5rem; flex-wrap:wrap; margin-top: 10px; }
+    .pc-stage{ position:relative; display:flex; justify-content:center; align-items:center; min-height: 520px; }
+    #pc-canvas{
+      width: 100%;
+      max-width: 760px;
+      height: auto;
+      background:#0b0d12;
+      border: 1px solid #2a2d31;
+      border-radius: 16px;
+      touch-action:none;
+      display:block;
+    }
+    .pc-badge{
+      position:absolute;
+      top: 12px;
+      left: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(20,22,25,.85);
+      border: 1px solid #2a2d31;
+      color:#9aa1a8;
+      font-size: 0.82rem;
+      backdrop-filter: blur(6px);
+    }
+    .pc-warn{
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,180,74,.35);
+      background: rgba(255,180,74,.08);
+      color: #ffd7a3;
+      font-size: 0.85rem;
+      line-height: 1.35;
+    }
+
+    /* ===== Fighter Card Portrait Placement ===== */
+    .cc-portrait-wrap{
+      width: 240px;
+      height: 208px;
+      margin-top: 10px;
+      background: transparent;
+    }
+    .cc-portrait-img{
+      width: 100%;
+      height: 100%;
+      object-fit: contain; /* preserves full 682×592 frame */
+      display:block;
+    }
+
 </style>
 
 <script>
@@ -3085,8 +3917,7 @@ window.copyFighterText = function () {
 
       // base URLs for assets (same as existing builder approach)
       var baseHref = getBaseHref();
-      var logoUrl = (new URL("./img/mortalislogo.png", baseHref)).href;
-      var texUrl  = (new URL("./img/mortalistexture.jpg", baseHref)).href;
+var texUrl  = (new URL("./img/mortalistexture.jpg", baseHref)).href;
 
       // card
       var card = document.createElement("div");
@@ -3102,11 +3933,16 @@ window.copyFighterText = function () {
       });
       applyTexture();
 
-      // logo
-      var logo = document.createElement("img");
-      logo.className = "cc-logo";
-      logo.src = logoUrl;
-      logo.alt = "Mortalis";
+      // top wrapper (header + stats) so portrait stops before options pill
+      var topwrap = document.createElement("div");
+      topwrap.className = "cc-topwrap";
+      if (window.fighter && fighter.portraitDataUrl){
+        var bgp = document.createElement("img");
+        bgp.className = "cc-bg-portrait";
+        bgp.src = fighter.portraitDataUrl;
+        bgp.alt = "Portrait";
+        topwrap.appendChild(bgp);
+      }
       // name + points
       var nm = (fighter.name && fighter.name.trim()) ? fighter.name.trim() : "Fighter";
       var total = computeTotal ? computeTotal() : 0;
@@ -3123,9 +3959,7 @@ window.copyFighterText = function () {
 
       var headerCenter = document.createElement("div");
       headerCenter.className = "cc-header-center";
-      headerCenter.appendChild(logo);
-
-      var headerRight = document.createElement("div");
+var headerRight = document.createElement("div");
       headerRight.className = "cc-header-right";
 
       var left = document.createElement("div");
@@ -3160,7 +3994,7 @@ window.copyFighterText = function () {
       header.appendChild(headerLeft);
       header.appendChild(headerCenter);
       header.appendChild(headerRight);
-      card.appendChild(header);
+      topwrap.appendChild(header);
 
       // stats pills
       var statsWrap = document.createElement("div");
@@ -3195,7 +4029,8 @@ else if (_k === "def" || _k === "fight" || _k === "shoot") _vv += '+';
 p.innerHTML = "<div class=\"cc-stat-label\">" + esc(k) + "</div><div class=\"cc-stat-val\">" + esc(_vv) + "</div>";
         statsWrap.appendChild(p);
       });
-      card.appendChild(statsWrap);
+      topwrap.appendChild(statsWrap);
+      card.appendChild(topwrap);
 
       // options pill
       var optPill = document.createElement("div");
@@ -3295,8 +4130,6 @@ p.innerHTML = "<div class=\"cc-stat-label\">" + esc(k) + "</div><div class=\"cc-
         requestAnimationFrame(function(){ requestAnimationFrame(fitOptions); });
       }
       fitSoon();
-      // re-fit after logo image loads (affects layout) and after a short delay
-      try{ logo.addEventListener("load", fitSoon); }catch(e){}
       setTimeout(fitSoon, 120);
       // re-fit on resize while overlay is open
       window.addEventListener("resize", function(){
