@@ -488,7 +488,7 @@
          <input id="file-load-json" type="file" accept="application/json" hidden>
        </label>
 
-       <button class="tab-pill" id="btn-portrait" type="button" title="Crop / set portrait">Portrait</button>
+       <button class="tab-pill-colour" id="btn-portrait" type="button" title="Crop / set portrait" style="display:none;">Portrait</button>
  
      </div>
 </header>
@@ -1606,7 +1606,7 @@
         html += "</div>";
         html += "</div>";
 
-        html += "<div style='display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.6rem;'>";        html += "<button class='tab-pill-colour' onclick='copyFighterText()'>Copy Text</button>";
+        html += "<div style='display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.6rem;'>";        html += "<button class='tab-pill-colour' onclick='copyFighterText()'>Copy Text</button>";        html += "<button class='tab-pill' onclick='openPortraitFromSummary()'>Portrait</button>";
         
         html += "<button class=\'tab-pill-colour\' onclick=\'printFighterCard\(\)\'>Generate Card</button>";
 html += "</div>";
@@ -1731,7 +1731,13 @@ html += "</div>";
       }
 
       // Exposed to onclick handlers
-      
+
+      // Open the existing Portrait cropper (button is in header but hidden)
+      window.openPortraitFromSummary = function () {
+        var b = document.getElementById("btn-portrait");
+        if (b) b.click();
+      };
+
       // ===== Print-friendly Card =====
       
       // ===== Generate Card (in-page) =====
