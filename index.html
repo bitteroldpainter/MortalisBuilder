@@ -3720,11 +3720,14 @@ var upBtn = pill.querySelector(".stat-up");
     border-bottom: 1px solid rgba(0,0,0,0.35);
     padding: 4px 6px;
   }
+.cc-weapons table thead th:nth-child(5),
+.cc-weapons table tbody td:nth-child(5) {
+  padding-left: 20px;
+}
 .cc-weapons table thead th:nth-child(4),
 .cc-weapons table tbody td:nth-child(4) {
-  padding-left: 30px;
+  padding-left: 10px;
 }
-
 
   .cc-weapons td{
     padding: 4px 6px;
@@ -3732,7 +3735,7 @@ var upBtn = pill.querySelector(".stat-up");
     border-bottom: 1px solid rgba(0,0,0,0.15);
   }
   .cc-weapons tr:last-child td{ border-bottom:none; } 
-  .cc-weapons .wname{ font-weight: 900; width: 28%; } /* Weapon Title */
+  .cc-weapons .wname{ font-weight: 900; width: 24%; } /* Weapon Title */
   .cc-weapons .wnum{ font-weight: 900; text-align:center; white-space:nowrap; }
   .cc-weapons .wrules{ font-weight: 600;}
     
@@ -4114,6 +4117,10 @@ function parseAtk(profile){
   var m = String(profile||"").match(/\bATK\s*([^,]+)/i);
   return m ? m[1].trim() : "";
 }
+function parseDmg(profile){
+  var m = String(profile||"").match(/\bDMG\s*([^,]+)/i);
+  return m ? m[1].trim() : "";
+}
 function stripProfile(p){
   if (!p) return "";
   var parts = String(p).split(",").map(function(x){return x.trim();}).filter(Boolean);
@@ -4132,11 +4139,13 @@ var shootVal = pickStat(["Shoot","shoot"]);
 var weaponRows = [];
 
 (fighter.ccWeapons||[]).forEach(function(w){
+  var prof = (w && (w.profile || w.effect)) || "";
   weaponRows.push({
     name:  w && w.name ? String(w.name) : "",
     atk:   (atkVal!=null ? String(atkVal) : ""),
+    dmg:   parseDmg(prof),
     hit:   fmtPlus(fightVal),
-    rules: stripProfile((w && (w.profile || w.effect)) || "")
+    rules: stripProfile(prof)
   });
 });
 
@@ -4145,6 +4154,7 @@ var weaponRows = [];
   weaponRows.push({
     name:  w && w.name ? String(w.name) : "",
     atk:   parseAtk(prof),
+    dmg:   parseDmg(prof),
     hit:   fmtPlus(shootVal),
     rules: stripProfile(prof)
   });
@@ -4159,6 +4169,7 @@ if (weaponRows.length){
     + "<th>Weapon</th>"
     + "<th style=\"width:80px; text-align:center;\">ATK</th>"
     + "<th style=\"width:80px; text-align:center;\">To Hit</th>"
+    + "<th style=\"width:80px; text-align:center;\">DMG</th>"
     + "<th>Special Rules</th>"
     + "</tr>";
   t.appendChild(thead);
@@ -4181,6 +4192,11 @@ if (weaponRows.length){
     tdH.className = "wnum";
     tdH.textContent = (r.hit!=null ? String(r.hit) : "");
     tr.appendChild(tdH);
+
+    var tdD = document.createElement("td");
+    tdD.className = "wnum";
+    tdD.textContent = (r.dmg!=null ? String(r.dmg) : "");
+    tr.appendChild(tdD);
 
     var tdR = document.createElement("td");
     tdR.className = "wrules";
