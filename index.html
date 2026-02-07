@@ -3679,9 +3679,9 @@ var upBtn = pill.querySelector(".stat-up");
   .cc-stats{
     margin-top: 12px;
     display:grid;
-    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-    gap:8px;
-    padding: 0 20px;
+    grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
+    gap:22px;
+    padding: 0 120px;
   }
   .cc-stat{
     background: rgba(236,241,231,0.95);
@@ -3697,6 +3697,45 @@ var upBtn = pill.querySelector(".stat-up");
   
   .cc-stat-label{font-size:12px; font-weight:800; opacity:0.85; margin-bottom:2px; text-transform: uppercase; color:#111;}
   .cc-stat-val{font-size:19px; font-weight:900; line-height:1.05; color:#111; display:block;}
+
+  /* --- Weapons profile table (auto from selected weapons) --- */
+  .cc-weapons{
+    margin:none;
+    background: transparent;
+    border-bottom: 1px solid black;
+    padding: 8px 10px;
+
+  
+    column-span: all;
+    -webkit-column-span: all;
+    break-inside: avoid;
+    margin-bottom: 10px;
+  }
+  .cc-weapons table{ width:100%; border-collapse:collapse; font-size:13px; }
+  .cc-weapons th{
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    text-align:left;
+    border-bottom: 1px solid rgba(0,0,0,0.35);
+    padding: 4px 6px;
+  }
+.cc-weapons table thead th:nth-child(4),
+.cc-weapons table tbody td:nth-child(4) {
+  padding-left: 30px;
+}
+
+
+  .cc-weapons td{
+    padding: 4px 6px;
+    vertical-align: top;
+    border-bottom: 1px solid rgba(0,0,0,0.15);
+  }
+  .cc-weapons tr:last-child td{ border-bottom:none; } 
+  .cc-weapons .wname{ font-weight: 900; width: 28%; } /* Weapon Title */
+  .cc-weapons .wnum{ font-weight: 900; text-align:center; white-space:nowrap; }
+  .cc-weapons .wrules{ font-weight: 600;}
+    
 /* Single options pill */
   .cc-options-pill{
     margin-top: 14px;
@@ -3725,7 +3764,8 @@ var upBtn = pill.querySelector(".stat-up");
     font-size: calc(13px * var(--opt-scale));
     line-height: calc(1.25 * var(--opt-scale));
     padding-bottom: 10px;
-    
+}
+
   }
   .cc-sec{break-inside:auto; page-break-inside:auto; margin: 0 0 18px 0;}
   .cc-sec-title{font-weight:900; margin: 0 0 6px 0; color:#111; font-size:1.15em;}
@@ -3734,12 +3774,29 @@ var upBtn = pill.querySelector(".stat-up");
     border-top: 1px solid rgba(0,0,0,0.15);
     padding-top: 8px;
   }
+/* Don’t leave the title stranded at the bottom of a column */
+.cc-sec-title{
+  break-after: avoid-column;
+  break-inside: avoid;
+}
+
+/* Keep the first item with the title (so you don’t get “title only”) */
+.cc-sec > .cc-list > li:first-child,
+.cc-sec > p:first-of-type,
+.cc-sec > div:first-of-type {
+  break-inside: avoid;
+}
+
+/* Optional: prevent an individual list item splitting (rare, but nice) */
+.cc-list li{
+  break-inside: avoid;
+}
 
   .cc-list{margin:0; padding-left: 18px;}
-  .cc-item{margin: 0 0 6px 0;break-inside: avoid; page-break-inside: avoid;}
+  .cc-item{margin: 0 0 6px 0;}
 
   .cc-muted{color:#555; font-weight: 600;}
-  .cc-item > div{break-inside: avoid; page-break-inside: avoid;}
+
 
   @media print{
     body{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
@@ -3941,6 +3998,7 @@ var texUrl  = (new URL("./img/mortalistexture.jpg", baseHref)).href;
 
       // top wrapper (header + stats) so portrait stops before options pill
       var topwrap = document.createElement("div");
+      var pendingWeaponsWrap = null;
       topwrap.className = "cc-topwrap";
       if (window.fighter && fighter.portraitDataUrl){
         var bgp = document.createElement("img");
@@ -4010,7 +4068,9 @@ var headerRight = document.createElement("div");
       var order = ["Move","M","DEF","Defense","AP","HP","ATK","Attack","Fight","Shoot"];
       var used = {};
       order.forEach(function(k){
-        var v = (s[k]!=null)?s[k]:null;
+                var _kl = String(k).toLowerCase();
+        if (_kl === 'atk' || _kl === 'attack' || _kl === 'fight' || _kl === 'shoot') return;
+var v = (s[k]!=null)?s[k]:null;
         if (v==null) return;
         used[k]=true;
         var p = document.createElement("div");
@@ -4024,7 +4084,9 @@ p.innerHTML = "<div class=\"cc-stat-label\">" + esc(k) + "</div><div class=\"cc-
         statsWrap.appendChild(p);
       });
       Object.keys(s).forEach(function(k){
-        if (used[k]) return;
+                var _kl2 = String(k).toLowerCase();
+        if (_kl2 === 'atk' || _kl2 === 'attack' || _kl2 === 'fight' || _kl2 === 'shoot') return;
+if (used[k]) return;
         var p = document.createElement("div");
         p.className = "cc-stat";
         var _k = String(k).toLowerCase();
@@ -4035,6 +4097,102 @@ else if (_k === "def" || _k === "fight" || _k === "shoot") _vv += '+';
 p.innerHTML = "<div class=\"cc-stat-label\">" + esc(k) + "</div><div class=\"cc-stat-val\">" + esc(_vv) + "</div>";
         statsWrap.appendChild(p);
       });
+      
+// weapons profile table (auto; flexible rows)
+function pickStat(keys){
+  for (var i=0;i<keys.length;i++){
+    var kk = keys[i];
+    if (s && s[kk] != null) return s[kk];
+  }
+  return null;
+}
+function fmtPlus(v){
+  if (v == null || v === "") return "";
+  return String(v) + "+";
+}
+function parseAtk(profile){
+  var m = String(profile||"").match(/\bATK\s*([^,]+)/i);
+  return m ? m[1].trim() : "";
+}
+function stripProfile(p){
+  if (!p) return "";
+  var parts = String(p).split(",").map(function(x){return x.trim();}).filter(Boolean);
+  parts = parts.filter(function(x){
+    var xl = x.toLowerCase();
+    if (xl.startsWith("atk")) return false;
+    if (xl.startsWith("hit")) return false;
+    if (xl.startsWith("dmg")) return false;
+    return true;
+  });
+  return parts.join(", ");
+}
+var atkVal   = pickStat(["ATK","Attack","atk","attack"]);
+var fightVal = pickStat(["Fight","fight"]);
+var shootVal = pickStat(["Shoot","shoot"]);
+var weaponRows = [];
+
+(fighter.ccWeapons||[]).forEach(function(w){
+  weaponRows.push({
+    name:  w && w.name ? String(w.name) : "",
+    atk:   (atkVal!=null ? String(atkVal) : ""),
+    hit:   fmtPlus(fightVal),
+    rules: stripProfile((w && (w.profile || w.effect)) || "")
+  });
+});
+
+(fighter.rangedWeapons||[]).forEach(function(w){
+  var prof = (w && (w.profile || w.effect)) || "";
+  weaponRows.push({
+    name:  w && w.name ? String(w.name) : "",
+    atk:   parseAtk(prof),
+    hit:   fmtPlus(shootVal),
+    rules: stripProfile(prof)
+  });
+});
+
+if (weaponRows.length){
+  var wWrap = document.createElement("div");
+  wWrap.className = "cc-weapons";
+  var t = document.createElement("table");
+  var thead = document.createElement("thead");
+  thead.innerHTML = "<tr>"
+    + "<th>Weapon</th>"
+    + "<th style=\"width:80px; text-align:center;\">ATK</th>"
+    + "<th style=\"width:80px; text-align:center;\">To Hit</th>"
+    + "<th>Special Rules</th>"
+    + "</tr>";
+  t.appendChild(thead);
+
+  var tbody = document.createElement("tbody");
+  weaponRows.forEach(function(r){
+    var tr = document.createElement("tr");
+
+    var tdN = document.createElement("td");
+    tdN.className = "wname";
+    tdN.textContent = r.name || "";
+    tr.appendChild(tdN);
+
+    var tdA = document.createElement("td");
+    tdA.className = "wnum";
+    tdA.textContent = (r.atk!=null ? String(r.atk) : "");
+    tr.appendChild(tdA);
+
+    var tdH = document.createElement("td");
+    tdH.className = "wnum";
+    tdH.textContent = (r.hit!=null ? String(r.hit) : "");
+    tr.appendChild(tdH);
+
+    var tdR = document.createElement("td");
+    tdR.className = "wrules";
+    tdR.textContent = r.rules || "";
+    tr.appendChild(tdR);
+
+    tbody.appendChild(tr);
+  });
+  t.appendChild(tbody);
+  wWrap.appendChild(t);
+  pendingWeaponsWrap = wWrap;
+}
       topwrap.appendChild(statsWrap);
       card.appendChild(topwrap);
 
@@ -4046,7 +4204,9 @@ p.innerHTML = "<div class=\"cc-stat-label\">" + esc(k) + "</div><div class=\"cc-
       optPill.appendChild(optInner);
       card.appendChild(optPill);
 
-      function addSection(title, arr, mainKey){
+      
+      if (pendingWeaponsWrap) { optInner.appendChild(pendingWeaponsWrap); }
+function addSection(title, arr, mainKey){
         if (!arr || !arr.length) return;
         var sec = document.createElement("div");
         sec.className = "cc-sec";
@@ -4070,10 +4230,7 @@ p.innerHTML = "<div class=\"cc-stat-label\">" + esc(k) + "</div><div class=\"cc-
         sec.appendChild(ul);
         optInner.appendChild(sec);
       }
-
-      addSection("Close Combat Weapons", fighter.ccWeapons);
-      addSection("Ranged Weapons", fighter.rangedWeapons);
-      addSection("Abilities", fighter.abilities);
+addSection("Abilities", fighter.abilities);
       addSection("Leader Abilities", fighter.leaderAbilities);
       addSection("Psychic Powers", fighter.spells);
       addSection("Equipment", fighter.equipment);
