@@ -1569,6 +1569,34 @@
           equipment: 0
         }
       };
+
+// === Cosmetic display-name overrides (builder + card) ===
+function getDisplayName(item){
+  if(!item) return "";
+  var n = (item.displayNameOverride != null ? String(item.displayNameOverride) : "").trim();
+  if(n) return n;
+  return (item.name != null ? String(item.name) : "");
+}
+
+window.getDisplayName = getDisplayName;
+function setDisplayNameOverride(item, newName){
+  if(!item) return;
+  var n = (newName != null ? String(newName) : "").trim();
+  if(n){
+    item.displayNameOverride = n;
+  } else {
+    delete item.displayNameOverride;
+  }
+}
+function promptRename(item, fallbackLabel){
+  var current = (item && item.displayNameOverride) ? String(item.displayNameOverride) : "";
+  var base = (item && item.name) ? String(item.name) : (fallbackLabel||"");
+  var val = window.prompt("Rename for card (cosmetic only). Leave blank to reset.", current || base);
+  if(val === null) return false; // cancelled
+  setDisplayNameOverride(item, val);
+  return true;
+}
+
       // Expose state for external card renderer
       window.fighter = fighter;
       window.computeTotal = computeTotal;
@@ -1833,7 +1861,7 @@ var texUrl  = (new URL("./img/mortalistexture.jpg", baseHref)).href;
               var meta = (title === "Psychic Powers") ? spellMetaLabel(x) : ((x.points || 0) + " pts");
               var main = (x.profile || x.effect || "");
               var rulesHtml = renderRulesHtml(main);
-              out += "<li><b>" + esc(x.name) + "</b> <span class='muted'>(" + esc(meta) + ")</span>";
+              out += "<li><b>" + esc(getDisplayName(x)) + "</b> <span class='muted'>(" + esc(meta) + ")</span>";
               if (rulesHtml) out += "<br><span class='muted'>" + rulesHtml + "</span>";
               out += "</li>";
             }
@@ -2516,7 +2544,7 @@ var upBtn = pill.querySelector(".stat-up");
               + '  </div>'
               + '  <div class="item-footer">'
               + '    <div></div>'
-              + '    <div class="item-actions"><button class="remove-btn">Remove</button></div>'
+              + '    <div class="item-actions"><button class="rename-btn">Rename</button><button class="remove-btn">Remove</button></div>'
               + '  </div>'
               + '</div>';
           }
@@ -2536,6 +2564,23 @@ var upBtn = pill.querySelector(".stat-up");
               });
             })(removes[i]);
           }
+
+
+var renames = listEl.getElementsByClassName("rename-btn");
+for (i = 0; i < renames.length; i++) {
+  (function (btn) {
+    btn.addEventListener("click", function () {
+      var row = btn.closest(".item-row");
+      var idx = parseInt(row.getAttribute("data-idx"), 10);
+      var it = fighter[targetArrayName][idx];
+      if (promptRename(it)) {
+        refreshTotal();
+        updateSummary();
+        renderSelected();
+      }
+    });
+  })(renames[i]);
+}
         }
 
         var adds = container.getElementsByClassName("add-btn");
@@ -2651,7 +2696,7 @@ var upBtn = pill.querySelector(".stat-up");
                 + '  </div>'
                 + '  <div class="item-footer">'
                 + '    <div></div>'
-                + '    <div class="item-actions"><button class="remove-btn" data-type="cc">Remove</button></div>'
+                + '    <div class="item-actions"><button class="rename-btn" data-type="cc">Rename</button><button class="remove-btn" data-type="cc">Remove</button></div>'
                 + '  </div>'
                 + '</div>';
             }
@@ -2672,6 +2717,25 @@ var upBtn = pill.querySelector(".stat-up");
               });
             })(removes[i]);
           }
+
+
+var renames = container.getElementsByClassName("rename-btn");
+for (i = 0; i < renames.length; i++) {
+  (function (btn) {
+    btn.addEventListener("click", function () {
+      var row = btn.closest(".item-row");
+      var idx = parseInt(row.getAttribute("data-idx"), 10);
+      var grp = row.getAttribute("data-group") || btn.getAttribute("data-type");
+      var arr = (grp === "ranged" ? fighter.rangedWeapons : fighter.ccWeapons);
+      var it = arr[idx];
+      if (promptRename(it)) {
+        refreshTotal();
+        updateSummary();
+        renderSelected();
+      }
+    });
+  })(renames[i]);
+}
 
           var upgToggles = container.getElementsByClassName("upgrade-toggle");
           for (i = 0; i < upgToggles.length; i++) {
@@ -2835,7 +2899,7 @@ var upBtn = pill.querySelector(".stat-up");
                 + '  </div>'
                 + '  <div class="item-footer">'
                 + '    <div></div>'
-                + '    <div class="item-actions"><button class="remove-btn" data-type="ranged">Remove</button></div>'
+                + '    <div class="item-actions"><button class="rename-btn" data-type="ranged">Rename</button><button class="remove-btn" data-type="ranged">Remove</button></div>'
                 + '  </div>'
                 + '</div>';
             }
@@ -2857,7 +2921,26 @@ var upBtn = pill.querySelector(".stat-up");
             })(removes[i]);
           }
 
-          var upgToggles = container.getElementsByClassName("upgrade-toggle");
+          
+
+          var renames = container.getElementsByClassName("rename-btn");
+          for (i = 0; i < renames.length; i++) {
+            (function (btn) {
+              btn.addEventListener("click", function () {
+                var row = btn.closest(".item-row");
+                var idx = parseInt(row.getAttribute("data-idx"), 10);
+                var arr = fighter.rangedWeapons;
+                var it = arr[idx];
+                if (promptRename(it)) {
+                  refreshTotal();
+                  updateSummary();
+                  renderSelected();
+                }
+              });
+            })(renames[i]);
+          }
+
+var upgToggles = container.getElementsByClassName("upgrade-toggle");
           for (i = 0; i < upgToggles.length; i++) {
             (function (input) {
               input.addEventListener("change", function () {
@@ -4181,7 +4264,7 @@ var weaponRows = [];
 (fighter.ccWeapons||[]).forEach(function(w){
   var prof = (w && (w.profile || w.effect)) || "";
   weaponRows.push({
-    name:  w && w.name ? String(w.name) : "",
+    name:  w ? String(getDisplayName(w)) : "",
     atk:   (atkVal!=null ? String(atkVal) : ""),
     dmg:   parseDmg(prof),
     hit:   fmtPlus(fightVal),
@@ -4192,7 +4275,7 @@ var weaponRows = [];
 (fighter.rangedWeapons||[]).forEach(function(w){
   var prof = (w && (w.profile || w.effect)) || "";
   weaponRows.push({
-    name:  w && w.name ? String(w.name) : "",
+    name:  w ? String(getDisplayName(w)) : "",
     atk:   parseAtk(prof),
     dmg:   parseDmg(prof),
     hit:   fmtPlus(shootVal),
@@ -4279,7 +4362,7 @@ function addSection(title, arr, mainKey){
           var meta = (title === "Psychic Powers") ? spellMetaLabel(x) : ((x.points || 0) + " pts");
           var main = x.profile || x.effect || "";
           var rulesHtml = renderRulesHtml(main);
-          li.innerHTML = "<b>" + esc(x.name) + "</b> <span class='cc-muted'>(" + esc(meta) + ")</span>" +
+          li.innerHTML = "<b>" + esc(getDisplayName(x)) + "</b> <span class='cc-muted'>(" + esc(meta) + ")</span>" +
                          (rulesHtml ? "<br><span class='cc-muted'>" + rulesHtml + "</span>" : "");
           ul.appendChild(li);
         });
