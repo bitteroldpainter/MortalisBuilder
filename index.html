@@ -373,40 +373,19 @@
     }
     .cc-tex-toggle input{ accent-color: #111; }
 
- /* Print only the generated card (avoid blank first page) */
-@media print {
-
-  @page {
-    margin: 12mm; /* printer-safe margin */
-  }
-
-  body.print-card-mode {
-    margin: 0 !important;
-    padding: 0 !important;
-    background: transparent !important;
-  }
-
-  body.print-card-mode .app {
-    display: none !important;
-  }
-
-  body.print-card-mode #generated-card-overlay {
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    position: fixed !important;
-    inset: 0 !important;
-    background: transparent !important;
-    padding: 0 !important;
-  }
-
-  body.print-card-mode #generated-card-overlay .card-wrap {
-    margin: 0 !important;
-    transform: none !important;
-    box-shadow: none !important;
-    page-break-inside: avoid !important;
-  }
-}
+    /* Print only the generated card (no blank first page) */
+    @media print {
+      body.print-card-mode .app { display:none !important; }
+      body.print-card-mode #generated-card-overlay{
+        display:block !important;
+        position: static !important;
+        inset: auto !important;
+        overflow: visible !important;
+        padding: 0 !important;
+        background: transparent !important;
+      }
+      body.print-card-mode #generated-card-toolbar{ display:none !important; }
+    }
 
 
 
