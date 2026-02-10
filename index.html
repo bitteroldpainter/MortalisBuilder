@@ -373,19 +373,40 @@
     }
     .cc-tex-toggle input{ accent-color: #111; }
 
-    /* Print only the generated card (no blank first page) */
-    @media print {
-      body.print-card-mode .app { display:none !important; }
-      body.print-card-mode #generated-card-overlay{
-        display:block !important;
-        position: static !important;
-        inset: auto !important;
-        overflow: visible !important;
-        padding: 0 !important;
-        background: transparent !important;
-      }
-      body.print-card-mode #generated-card-toolbar{ display:none !important; }
-    }
+ /* Print only the generated card (avoid blank first page) */
+@media print {
+
+  @page {
+    margin: 12mm; /* printer-safe margin */
+  }
+
+  body.print-card-mode {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  body.print-card-mode .app {
+    display: none !important;
+  }
+
+  body.print-card-mode #generated-card-overlay {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    position: fixed !important;
+    inset: 0 !important;
+    background: transparent !important;
+    padding: 0 !important;
+  }
+
+  body.print-card-mode #generated-card-overlay .card-wrap {
+    margin: 0 !important;
+    transform: none !important;
+    box-shadow: none !important;
+    page-break-inside: avoid !important;
+  }
+}
 
 
 
@@ -3722,10 +3743,9 @@ var upgToggles = container.getElementsByClassName("upgrade-toggle");
   
   .cc-leftpill{
     background: rgba(255,255,255,0.92);
-    border: 1px solid rgba(0,0,0,0.5);
+    border: 1px solid black;
     border-radius: 14px;
     padding: 10px 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.5);
     flex: 1 1 auto;
     box-sizing:border-box;
     width: 260px;
@@ -3744,10 +3764,9 @@ var upgToggles = container.getElementsByClassName("upgrade-toggle");
   }
   .cc-pts{
     background: rgba(255,255,255,0.92);
-    border: 1px solid rgba(0,0,0,0.5);
+    border: 1px solid black;
     border-radius: 14px;
     padding: 8px 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.5);
     font-weight: 900;
     color:#111;
     min-width: 50px;
@@ -3789,10 +3808,9 @@ var upgToggles = container.getElementsByClassName("upgrade-toggle");
   }
   .cc-stat{
     background: rgba(236,241,231,0.95);
-    border: 1px solid rgba(0,0,0,0.5);
+    border: 1px solid black;
     border-radius: 14px;
     padding: 8px 6px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.5);
     text-align:center;
   
     color:#111;
@@ -3850,11 +3868,10 @@ var upgToggles = container.getElementsByClassName("upgrade-toggle");
     min-height: 0;
     display:flex;
     background: rgba(255,255,255,0.88);
-    border: 1px solid rgba(0,0,0,0.5);
+    border: 1px solid black;
     border-radius: 14px;
     padding: 10px;
     padding-bottom: 20px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.5);
     overflow: hidden;
     position: relative; position: relative;
     box-sizing: border-box;
