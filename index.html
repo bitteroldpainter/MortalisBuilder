@@ -3826,6 +3826,23 @@ var upgToggles = container.getElementsByClassName("upgrade-toggle");
     break-inside: avoid;
     margin-bottom: 10px;
   }
+
+    /* Weapon icon alignment */
+.weapon-icon{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:16px;
+  height:16px;
+  margin-right:6px;
+  vertical-align:middle;
+}
+
+.weapon-icon img{
+  width:100%;
+  height:100%;
+  display:block;
+}
   .cc-weapons table{ width:100%; border-collapse:collapse; font-size:13px; }
   .cc-weapons th{
     text-transform: uppercase;
@@ -3851,6 +3868,17 @@ var upgToggles = container.getElementsByClassName("upgrade-toggle");
   }
   .cc-weapons tr:last-child td{ border-bottom:none; } 
   .cc-weapons .wname{ font-weight: 900; width: 24%; } /* Weapon Title */
+  .cc-weapons .wname .wicon{
+    display:inline-block;
+    width:14px; height:14px;
+    margin-right:6px;
+    vertical-align:-2px;
+  }
+  .cc-weapons .wname img.wicon{
+    object-fit:contain;
+  }
+  .cc-weapons .wname .wicon-cc{ color:#c2410c; }      /* fallback emoji tint */
+  .cc-weapons .wname .wicon-ranged{ color:#374151; }  /* fallback emoji tint */
   .cc-weapons .wnum{ font-weight: 900; text-align:center; white-space:nowrap; }
   .cc-weapons .wrules{ font-weight: 600;}
     
@@ -4262,9 +4290,17 @@ var fightVal = pickStat(["Fight","fight"]);
 var shootVal = pickStat(["Shoot","shoot"]);
 var weaponRows = [];
 
+// Optional custom weapon icons (set these globally, e.g. in a <script> before this file runs)
+// window.MORTALIS_WEAPON_ICON_CC = "./img/sword.svg";
+// window.MORTALIS_WEAPON_ICON_RANGED = "./img/gun.svg";
+var ICON_CC = window.MORTALIS_WEAPON_ICON_CC || "./img/sword.svg";
+var ICON_RANGED = window.MORTALIS_WEAPON_ICON_RANGED || "./img/crosshair.svg";
+
+
 (fighter.ccWeapons||[]).forEach(function(w){
   var prof = (w && (w.profile || w.effect)) || "";
   weaponRows.push({
+    type: "cc",
     name:  w ? String(getDisplayName(w)) : "",
     atk:   (atkVal!=null ? String(atkVal) : ""),
     dmg:   parseDmg(prof),
@@ -4276,6 +4312,7 @@ var weaponRows = [];
 (fighter.rangedWeapons||[]).forEach(function(w){
   var prof = (w && (w.profile || w.effect)) || "";
   weaponRows.push({
+    type: "ranged",
     name:  w ? String(getDisplayName(w)) : "",
     atk:   parseAtk(prof),
     dmg:   parseDmg(prof),
@@ -4304,7 +4341,21 @@ if (weaponRows.length){
 
     var tdN = document.createElement("td");
     tdN.className = "wname";
-    tdN.textContent = r.name || "";
+    // Weapon icon + name
+    var iconSrc = (r.type === "cc") ? ICON_CC : ICON_RANGED;
+    if (iconSrc) {
+      var im = document.createElement("img");
+      im.className = "wicon";
+      im.src = iconSrc;
+      im.alt = (r.type === "cc") ? "CC" : "Ranged";
+      tdN.appendChild(im);
+    } else {
+      var sp = document.createElement("span");
+      sp.className = "wicon wicon-" + (r.type || "");
+      sp.textContent = (r.type === "cc") ? "⚔" : "🏹";
+      tdN.appendChild(sp);
+    }
+    tdN.appendChild(document.createTextNode(r.name || ""));
     tr.appendChild(tdN);
 
     var tdA = document.createElement("td");
