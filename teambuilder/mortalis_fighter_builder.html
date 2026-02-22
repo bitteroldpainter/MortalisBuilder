@@ -3176,7 +3176,7 @@ var upgToggles = container.getElementsByClassName("upgrade-toggle");
         applyImportedFighterState(f);
       }
 
-      function autosaveNow(){
+      async function autosaveNow(){
         try{
           var payload = buildExportPayload();
         try{
