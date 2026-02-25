@@ -6,7 +6,8 @@
   <title>Mortalis — Team Builder</title>
 <style>
   :root{
-    --bg:#0b0f14; --panel:#272E30; --panel2:#3D3D3D;--panel3:#FC970D;
+    --bg:#0b0f14; --panel:linear-gradient(0deg, rgba(35,41,43,1), rgba(0,0,0,1)); --panel2:#3D3D3D;--panel3: linear-gradient(180deg, rgba(255,170,84,1), rgba(128,51,0,1));
+    
     --text:#e9f0ff;--text2:#000000; --muted:#a7b2c6;
 
     /* NEW border color */
@@ -156,12 +157,14 @@
     <div class="topbar">
       <div class="title">
         <h1>Mortalis — Team Builder</h1>
-        <div class="sub">Load multiple Fighter .json files, edit, copy and remove Fighters, and export and load entire Teams for later editing.</div>
+        <div class="sub">Load multiple Fighter .json files, edit, copy and remove Fighters, and export and load entire Teams for later editing.<br>
+        <strong>IMPORTANT: Safari seems to have problems with portraits going missing between exports/loads of teams.<br> 
+          However it seems to be working fine in Google Chrome and Firefox.</strong></div>
       </div>
       <div class="controls">
         <label class="pill" for="fileInput">Load Fighters (.json)</label>
         <input id="fileInput" type="file" multiple accept=".json,application/json" />
-        <button class="accent" id="addFighterBtn">Build/Add Fighter</button>
+        <button class="accent" id="addFighterBtn">Add Fighter</button>
         <button class="accent" id="exportBtn">Export Team (.json)</button>
         <label class="pill" for="teamInput">Load Team (.json)</label>
         <input id="teamInput" type="file" accept=".json,application/json" />

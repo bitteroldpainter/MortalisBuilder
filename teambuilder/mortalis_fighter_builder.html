@@ -73,7 +73,7 @@
       gap: 0.75rem;
     }
     .stat-pill {
-      background: #141619;
+      background: linear-gradient(0deg, rgba(35,41,43,1), rgba(0,0,0,1));
       border: 1px solid #ff9f1c;
       border-radius: 12px;
       padding: 0.45rem 0.7rem;
@@ -86,7 +86,7 @@
       font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      color: #9aa1a8;
+      color: #DFE4EB;
       margin-bottom: 0.15rem;
     }
     .stat-pill-controls {
@@ -156,8 +156,8 @@
       padding: 0.3rem 0.75rem;
       border-radius: 999px;
       border: 1px solid #374151;
-      background: #141619;
-      color: #e5e7eb;
+      background: linear-gradient(0deg, rgba(35,41,43,1), rgba(0,0,0,1));
+      color: #fff;
       font-size: 0.85rem;
       cursor: pointer;
     }
@@ -165,17 +165,17 @@
       padding: 0.3rem 0.75rem;
       border-radius: 999px;
       border: 1px solid #374151;
-      background: #f08102;
+      background: linear-gradient(180deg, rgba(255,170,84,1), rgba(128,51,0,1));
       color: #e5e7eb;
       font-size: 0.85rem;
       cursor: pointer;
     }
     .tab-pill:hover {
-      background: #030712;
+      background: #FFC24D;
     }
     .tab-pill.active {
-      background: #ff8c00;
-      color: #ffffff;
+      background: linear-gradient(180deg, rgba(255,170,84,1), rgba(128,51,0,1));
+      color: #fff;
       border-color: #101213;
     }
 
@@ -198,7 +198,7 @@
     }
     .subtab-pill:hover{ border-color:#6b7280; }
     .subtab-pill.active{
-      background:#1f2937;
+      background:linear-gradient(180deg, rgba(255,170,84,1), rgba(128,51,0,1));
       border-color:#9ca3af;
     }
 
@@ -221,7 +221,7 @@
     .item-row {
       padding: 0.35rem 0.5rem;
       border-radius: 0.5rem;
-      background: #101216;
+      background: linear-gradient(0deg, rgba(35,41,43,1), rgba(0,0,0,1));
       border: 1px solid #ff9f1c;
       display: flex;
       flex-direction: column;
@@ -258,8 +258,8 @@
     }
     .item-actions button {
       border: none;
-      background: #ff8c00;
-      color: #111827;
+      background: linear-gradient(180deg, rgba(255,170,84,1), rgba(128,51,0,1));
+      color: #fff;
       padding: 0.25rem 0.55rem;
       border-radius: 0.375rem;
       font-size: 0.8rem;
@@ -269,7 +269,7 @@
       background: #ffffff;
     }
     .item-actions .remove-btn {
-      background: #7f1d1d;
+      background: linear-gradient(180deg, rgba(148,18,18,1), rgba(0,0,0,.12));
       color: #fecaca;
     }
     .item-actions .remove-btn:hover {
@@ -296,8 +296,8 @@
     }
 /* Summary category pill */
 .summary-pill {
-  background: #141619;
-  border: 1px solid #2a2d31;
+  background: linear-gradient(0deg, rgba(35,41,43,1), rgba(0,0,0,1));
+  border: 1px solid #636161;
   border-radius: 12px;
   padding: 0.7rem 1rem;
   margin-bottom: 0.75rem;
@@ -336,7 +336,7 @@
   padding: 0.25rem 0.6rem;
   border-radius: 10px;
   background: #2b1400;
-  border: 1px solid #ff8c00;
+  border: 1px solid #636161;
   font-weight: 600;
   font-size: 1rem;
   white-space: nowrap;
@@ -831,7 +831,7 @@
   {
     id: "powerFromPain",
     name: "Power from Pain",
-    points: 2,
+    points: 4,
     effect:
       "This Fighter gains a PfP token each time it injures or slays an enemy. During its activation it may spend PfP to: gain 1 AP (this turn), regain D3+1 HP, or gain Reroll (SR) on all weapons (this turn)."
   },
@@ -2226,7 +2226,7 @@ window.copyFighterText = function () {
           + '    <input type="checkbox" class="warlock-toggle" data-type="master"> Master Psyker (+66% of Stat cost)'
           + '  </label>'
           + '  <div class="warlock-note">'
-          + '    Warlocks gain access to spells. Only one of these options may be active.'
+          + '    Psykers gain access to Psychic Powers. Only one of these options may be active.'
           + '  </div>'
           + '</div>';
 
@@ -4151,7 +4151,7 @@ document.addEventListener("DOMContentLoaded", function () {
     border: 1px solid black;
     border-radius: 14px;
     padding: 10px;
-    padding-bottom: 5px;
+    padding-bottom: 20px;
     overflow: hidden;
     position: relative; position: relative;
     box-sizing: border-box;
