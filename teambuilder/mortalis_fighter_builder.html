@@ -1082,14 +1082,6 @@
             "1 AP: Activate before rolling to Hit with a Close Combat attack. For that attack, Glancing Hits deal 2 Damage."
         },
         {
-          id: "getHimWarcry",
-          name: "Get Him! (War Cry)",
-          points: 0,
-          effect:
-            '2 AP: All friendly Fighters visible and within 6" gain EITHER (+2\" Move and +2 to Fight) OR (+2 to Shoot) until end of turn. ' +
-            "Can only be used once per battle, and this Fighter is immediately Spent."
-        },
-        {
           id: "mindOnMission",
           name: "Mind on the Mission",
           points: 0,
@@ -1144,7 +1136,7 @@
           points: 0,
           effect:
             'Range: 12"<br><br>' +
-            "Target suffers –3 to Shoot until end of Round; if Engaged, suffers –2 to Fight instead.<br><br>" +
+            "In its next activation, Target suffers –3 to Shoot; if Engaged, suffers –2 to Fight instead.<br><br>" +
             "Power Surge (MV 9): –4 to Shoot, –3 to Fight."
         },
         {
@@ -1489,7 +1481,7 @@
         },
         {
           id: "blessedAmmunition",
-          name: "Blessid / Tainted Ammunition (+)",
+          name: "Blessed / Tainted Ammunition (+)",
           points: 5,
           effect:
             "Add +1 to both Damage values of this Fighter’s Ranged weapons. Cannot be used on Heavy Weapons."
@@ -1541,6 +1533,13 @@
           points: 5,
           effect:
             'Whenever an enemy Fighter moves within 1", roll 3D12; for each 9+ that enemy suffers 1 MW.'
+        },  
+        {
+          id: "grenaDier",
+          name: "Grenadier (+)",
+          points: 6,
+          effect:
+            'This Fighter is equipped with unlimited Frag and Krak grenades and has +2 to hit when using them..'
         },
         {
           id: "psychicFamiliar",
