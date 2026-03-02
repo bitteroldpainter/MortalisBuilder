@@ -29,16 +29,24 @@
   .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
   button,.btn{
     background:var(--panel3); color:var(--text2);
-    border:1px solid var(--line2); border-radius:15px;
+    border:1px solid; var(--line2); border-radius:15px;
     padding:7px 9px; cursor:pointer; font-weight:500;
     font-size: 12px;
   }
-  button:hover{filter:brightness(1.06)}
-  button.danger{border-color:var(--line2)}
+
+  button.danger{
+    background:linear-gradient(180deg, rgba(140,48,62,1), rgba(0,0,0,1)); color:var(--text2);
+    border:1px solid; Border-color:#000000; border-radius:15px;
+    padding:7px 9px; cursor:pointer; font-weight:500;
+    font-size: 12px;
+  }
+ 
+  button:hover{background: #ffa200}
   button.danger:hover{filter:brightness(1.06)}
   button.accent{border-color:var(--line2)}
   button.accent:hover{filter:brightness(1.06)}
   input[type="file"]{display:none}
+
 
   .pill{
     display:inline-flex;align-items:center;gap:8px;
