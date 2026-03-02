@@ -98,11 +98,11 @@
   }
   .fighterHead{
     display:flex;align-items:center;justify-content:space-between;
-    gap:10px;padding:12px 14px;background:#1D2226
+    gap:10px;padding:12px 14px;background:linear-gradient(180deg, rgba(224,221,213,1), rgba(158,156,152,1));
   }
   .fighterHead .left{display:flex;flex-direction:column;gap:2px;min-width:0}
-  .fighterHead .name{font-weight:900;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:520px}
-  .fighterHead .meta{color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:520px}
+  .fighterHead .name{color:#000000;font-weight:900;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:520px}
+  .fighterHead .meta{color:#000000;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:520px}
   .fighterHead .right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 
   .costTag{
@@ -110,7 +110,8 @@
     border:1px solid var(--line);
     padding:6px 10px;
     border-radius:999px;
-    background:rgba(0,115,107,.12);
+    background:#fff;
+    color:#000000
   }
 
   details{border-top:1px solid var(--line)}
@@ -541,7 +542,7 @@
         <div class="fighter" data-id="${entry.id}">
           <div class="fighterHead">
             <div class="left">
-              <div class="name">${escapeHtml(f.name)} <span class="muted" style="font-weight:700">• ${escapeHtml(role)} • ${escapeHtml(appName)}</span></div>
+              <div class="name">${escapeHtml(f.name)} <span class="muted" style="font-weight:700"></span></div>
               <div class="meta">Source: ${escapeHtml(entry.sourceFileName || "—")}</div>
             </div>
             <div class="right">
