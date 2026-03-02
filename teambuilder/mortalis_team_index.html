@@ -8,34 +8,35 @@
   :root{
     --bg:#0b0f14; --panel:linear-gradient(0deg, rgba(35,41,43,1), rgba(0,0,0,1)); --panel2:#3D3D3D;--panel3: linear-gradient(180deg, rgba(255,170,84,1), rgba(128,51,0,1));
     
-    --text:#e9f0ff;--text2:#000000; --muted:#a7b2c6;
+    --text:#e9f0ff;--text2:#fff; --muted:#a7b2c6;
 
     /* NEW border color */
     --line:#FC970D;
-
+   --line2:#000000;
     --accent:#42d3ff; --danger:#ff5c73; --ok:#66ffb3;
   }
   *{box-sizing:border-box}
-  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background:linear-gradient(180deg,#070a0f,#0b0f14);color:var(--text)}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background:#1D2024;color:var(--text)}
 
   /* NEW: match builders */
   .wrap{max-width:960px;margin:0 auto;padding:18px}
 
   .topbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:14px}
   .title{display:flex;flex-direction:column;gap:2px}
-  .title h1{margin:0;font-size:18px;letter-spacing:.3px}
+  .title h1{margin:0;font-size:25px;letter-spacing:.3px}
   .title .sub{color:var(--muted);font-size:12px}
 
   .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
   button,.btn{
     background:var(--panel3); color:var(--text2);
-    border:1px solid var(--line); border-radius:10px;
-    padding:10px 12px; cursor:pointer; font-weight:500;
+    border:1px solid var(--line2); border-radius:15px;
+    padding:7px 9px; cursor:pointer; font-weight:500;
+    font-size: 12px;
   }
   button:hover{filter:brightness(1.06)}
-  button.danger{border-color:var(--line)}
+  button.danger{border-color:var(--line2)}
   button.danger:hover{filter:brightness(1.06)}
-  button.accent{border-color:var(--line)}
+  button.accent{border-color:var(--line2)}
   button.accent:hover{filter:brightness(1.06)}
   input[type="file"]{display:none}
 
