@@ -4523,6 +4523,22 @@ function fmtPlus(v){
   if (v == null || v === "") return "";
   return String(v) + "+";
 }
+function parseHitUserMod(profile){
+  // Matches: "Hit User", "Hit User+2", "Hit User-2", with optional spaces
+  var m = String(profile||"").match(/\bHit\s*User\s*([+-]\s*\d+)?\b/i);
+  if (!m) return 0;
+  if (!m[1]) return 0;
+  var n = parseInt(String(m[1]).replace(/\s+/g,""), 10);
+  return isNaN(n) ? 0 : n;
+}
+function applyHitUser(baseToHit, profile){
+  // In this system, a negative "to hit modifier" makes it HARDER (target number goes UP),
+  // so we reverse the sign when converting to the target number.
+  var b = parseInt(baseToHit, 10);
+  if (isNaN(b)) return baseToHit;
+  var mod = parseHitUserMod(profile);
+  return b - mod;
+}
 function parseAtk(profile){
   var m = String(profile||"").match(/\bATK\s*([^,]+)/i);
   return m ? m[1].trim() : "";
@@ -4562,7 +4578,7 @@ var ICON_RANGED = window.MORTALIS_WEAPON_ICON_RANGED || "./img/crosshair.svg";
     name:  w ? String(getDisplayName(w)) : "",
     atk:   (atkVal!=null ? String(atkVal) : ""),
     dmg:   parseDmg(prof),
-    hit:   fmtPlus(fightVal),
+    hit:   fmtPlus(applyHitUser(fightVal, prof)),
     rules: stripProfile(prof)
   });
 });
@@ -4574,7 +4590,7 @@ var ICON_RANGED = window.MORTALIS_WEAPON_ICON_RANGED || "./img/crosshair.svg";
     name:  w ? String(getDisplayName(w)) : "",
     atk:   parseAtk(prof),
     dmg:   parseDmg(prof),
-    hit:   fmtPlus(shootVal),
+    hit:   fmtPlus(applyHitUser(shootVal, prof)),
     rules: stripProfile(prof)
   });
 });
