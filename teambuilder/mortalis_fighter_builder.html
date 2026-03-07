@@ -573,6 +573,7 @@
   { id: "bigChainblade", name: "Big Chainblade", profile: "ATK User, Hit User, DMG 5/6", points: 5 },
   { id: "bladeAxe", name: "Blade/Axe", profile: "ATK User, Hit User, DMG 3/4", points: 2 },
   { id: "chainsword", name: "Chainsword", profile: "ATK User, Hit User, DMG 4/5", points: 4 },
+  { id: "flail", name: "Flail", profile: 'ATK User, Hit User-1, DMG 4/5, Rng 2"', points: 4 },
   { id: "hugeHammerAxeBlade", name: "Huge Hammer/Axe/Blade", profile: "ATK User, Hit User, DMG 5/6, Reroll (1)", points: 6 },
   { id: "monstrousClaws", name: "Monstrous Claws", profile: "ATK User, Hit User, DMG 5/6, MW (1)", points: 6 },
   { id: "poisonedKnife", name: "Poisoned Knife", profile: "ATK User, Hit User, DMG 3/4, Poison", points: 3 },
@@ -581,8 +582,10 @@
   { id: "powerKnife", name: "Power Knife", profile: "ATK User, Hit User, DMG 3/5, Crits on 9+", points: 4 },
   { id: "powerRapier", name: "Power Rapier", profile: "ATK User, Hit User, DMG 4/5, Crits on 9+", points: 6 },
   { id: "powerWeapon", name: "Power Weapon", profile: "ATK User, Hit User, DMG 4/6, Crits on 9+", points: 7 },
+  { id: "powerSpear", name: "Power Spear", profile: 'ATK User, Hit User, DMG 4/6, Rng 2", Crits on 9+', points: 8 },
   { id: "psychicStaff", name: "Psychic Staff", profile: "ATK User, Hit User, DMG 4/6, Crits on 9+, Fire", points: 8 },
   { id: "thunderHammer", name: "Thunder Hammer", profile: "ATK User, Hit User-2, DMG 5/7, Crits on 9+, MW (2)", points: 8 }
+  { id: "whip", name: "Whip", profile: "ATK User, Hit User-1, DMG 3/4", points: 2 },
 ];
 
 
@@ -971,6 +974,13 @@
     points: 10,
     effect:
       'This Fighter may make two activations per turn, and split his AP between 2 those activations. For all intents and purposes, this counts as two separate activations. '
+  },
+  {
+    id: "finalDefiance",
+    name: "Final Defiance",
+    points: 4,
+    effect:
+      'When this Fighter is slain, it may immediately perform one last action before removing it from play. '
   },
   {
     id: "superhumanWarrior",
