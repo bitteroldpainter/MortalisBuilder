@@ -363,7 +363,7 @@
     return Number.isFinite(n) ? n : d;
   }
 
-  function fmt(x, dp=2) {
+  function fmt(x, dp=1) {
     const m = Math.pow(10, dp);
     return (Math.round(x*m)/m).toString();
   }
@@ -623,18 +623,18 @@
 
     const out = simulateMany(p, RUNS);
 
-    els.kpiDmg.textContent = fmt(out.avgDmg, 2);
-    els.kpiMW.textContent  = fmt(out.avgMW, 2);
+    els.kpiDmg.textContent = fmt(out.avgDmg, 1);
+    els.kpiMW.textContent  = fmt(out.avgMW, 1);
 
-    els.avgCrits.textContent   = fmt(out.avgCrit, 2);
-    els.avgStd.textContent     = fmt(out.avgStd, 2);
-    els.avgGlance.textContent  = fmt(out.avgGl, 2);
+    els.avgCrits.textContent   = fmt(out.avgCrit, 1);
+    els.avgStd.textContent     = fmt(out.avgStd, 1);
+    els.avgGlance.textContent  = fmt(out.avgGl, 1);
 
-    els.avgUCrits.textContent  = fmt(out.avgUC, 2);
-    els.avgUStd.textContent    = fmt(out.avgUS, 2);
-    els.avgUGlance.textContent = fmt(out.avgUG, 2);
+    els.avgUCrits.textContent  = fmt(out.avgUC, 1);
+    els.avgUStd.textContent    = fmt(out.avgUS, 1);
+    els.avgUGlance.textContent = fmt(out.avgUG, 1);
 
-    els.avgSaved.textContent   = fmt(out.avgSaved, 2);
+    els.avgSaved.textContent   = fmt(out.avgSaved, 1);
   }
 
   document.querySelectorAll("#inputs input, #inputs select").forEach(el => {
