@@ -348,7 +348,7 @@
 </main>
 
 <script>
-  const RUNS = 20000;
+  const RUNS = 50000;
 
   function d12() { return (Math.random() * 12 | 0) + 1; }
 
@@ -363,7 +363,7 @@
     return Number.isFinite(n) ? n : d;
   }
 
-  function fmt(x, dp=3) {
+  function fmt(x, dp=2) {
     const m = Math.pow(10, dp);
     return (Math.round(x*m)/m).toString();
   }
