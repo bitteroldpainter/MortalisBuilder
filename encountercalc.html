@@ -623,18 +623,18 @@
 
     const out = simulateMany(p, RUNS);
 
-    els.kpiDmg.textContent = fmt(out.avgDmg, 3);
-    els.kpiMW.textContent  = fmt(out.avgMW, 3);
+    els.kpiDmg.textContent = fmt(out.avgDmg, 2);
+    els.kpiMW.textContent  = fmt(out.avgMW, 2);
 
-    els.avgCrits.textContent   = fmt(out.avgCrit, 3);
-    els.avgStd.textContent     = fmt(out.avgStd, 3);
-    els.avgGlance.textContent  = fmt(out.avgGl, 3);
+    els.avgCrits.textContent   = fmt(out.avgCrit, 2);
+    els.avgStd.textContent     = fmt(out.avgStd, 2);
+    els.avgGlance.textContent  = fmt(out.avgGl, 2);
 
-    els.avgUCrits.textContent  = fmt(out.avgUC, 3);
-    els.avgUStd.textContent    = fmt(out.avgUS, 3);
-    els.avgUGlance.textContent = fmt(out.avgUG, 3);
+    els.avgUCrits.textContent  = fmt(out.avgUC, 2);
+    els.avgUStd.textContent    = fmt(out.avgUS, 2);
+    els.avgUGlance.textContent = fmt(out.avgUG, 2);
 
-    els.avgSaved.textContent   = fmt(out.avgSaved, 3);
+    els.avgSaved.textContent   = fmt(out.avgSaved, 2);
   }
 
   document.querySelectorAll("#inputs input, #inputs select").forEach(el => {
