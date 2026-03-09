@@ -364,8 +364,7 @@
   }
 
   function fmt(x, dp=1) {
-    const m = Math.pow(10, dp);
-    return (Math.round(x*m)/m).toString();
+    return Number(x).toFixed(dp);
   }
 
   function critThresholdFromParams(p) {
