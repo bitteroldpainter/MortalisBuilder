@@ -35,27 +35,39 @@
   }
 
   button.danger{
-    background:linear-gradient(180deg, rgba(140,48,62,1), rgba(0,0,0,1)); color:var(--text2);
-    border:1px solid; Border-color:#000000; border-radius:15px;
-    padding:7px 9px; cursor:pointer; font-weight:500;
-    font-size: 12px;
+    background:linear-gradient(180deg, rgba(140,48,62,1), rgb(56, 0, 0)); color:var(--text2);
+    border:1px solid; Border-color:#FC970D; border-radius:999px;text-shadow: #000000 2px 2px 4px;
+    padding:10px 12px; cursor:pointer; font-weight:700;
+    font-size: 14px;
   }
  
   button:hover{background: #ffa200}
-  button.danger:hover{filter:brightness(1.06)}
-  button.accent{border-color:var(--line2)}
+  button.danger:hover{background: #d30000}
+  button.accent{border-color:var(--line2);font-size: 14px;font-weight: 700;text-shadow: #000000 2px 2px 4px; padding:10px 12px;border-radius:999px;}
   button.accent:hover{filter:brightness(1.06)}
+  button.accent2{border-color:var(--line);font-size: 14px;font-weight: 700;text-shadow: #000000 2px 2px 4px; padding:10px 12px;border-radius:999px;background:linear-gradient(180deg, rgb(98, 98, 98), rgb(24, 24, 24));}
+  button.accent2:hover{background: #ffa200}
   input[type="file"]{display:none}
 
 
   .pill{
     display:inline-flex;align-items:center;gap:8px;
     padding:10px 12px;border-radius:999px;border:1px solid var(--line);
+    background:linear-gradient(180deg, rgb(98, 98, 98), rgb(24, 24, 24));
+    color:var(--text); font-weight:700;
+    font-size: 14px;
+    cursor:pointer;
+    text-shadow: #000000 2px 2px 4px;
+  }
+
+    .pill2{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:10px 12px;border-radius:999px;border:1px solid var(--line);
     background:rgba(17,24,35,.7);
     color:var(--text); font-weight:700;
     cursor:pointer;
   }
-  .pill:hover{filter:brightness(1.06)}
+  .pill:hover{background: #ffa200}
 
   .statsRow{display:grid;grid-template-columns:1fr;gap:10px;margin:10px 0 14px}
   @media (min-width:900px){
@@ -170,10 +182,10 @@
         <div class="sub">Load multiple Fighter .json files, edit, copy and remove Fighters, and export and load entire Teams for later editing.</div>
       </div>
       <div class="controls">
-        <label class="pill" for="fileInput">Load Fighters (.json)</label>
+        <button class="accent" id="addFighterBtn">Build Fighter</button>
+        <button class="accent2" id="exportBtn">Export Team (.json)</button>
+         <label class="pill" for="fileInput">Load Fighters (.json)</label>
         <input id="fileInput" type="file" multiple accept=".json,application/json" />
-        <button class="accent" id="addFighterBtn">Add Fighter</button>
-        <button class="accent" id="exportBtn">Export Team (.json)</button>
         <label class="pill" for="teamInput">Load Team (.json)</label>
         <input id="teamInput" type="file" accept=".json,application/json" />
         <button class="danger" id="clearBtn">Clear Team</button>
